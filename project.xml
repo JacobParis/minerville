@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<project>
+	
+	<meta title="Miner" package="" version="1.0.0" company="Jacob Pariseau" />
+	<app main="Main" path="Export" file="miner" />
+	<window background="#000000" fps="20" />
+	<window width="360" height="640" />
+	<window orientation="portrait" vsync="false" antialiasing="0" if="cpp" />
+	<source path="Libraries" />
+	<source path="Source" />
+	<haxelib name="openfl" />
+	<haxeflag name="--connect" value="6000" />
+	<assets path="Assets" rename="assets" />
+	
+</project>
