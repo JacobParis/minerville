@@ -120,6 +120,10 @@ class TileMapService {
         return this;
     }
 
+    /**
+     *  Replaces a block with a floor and creates neighbouring blocks in the empty spaces around it
+     *  @param entity - The block to destroy
+     */
     public function destroyBlock(entity:Entity) {
         var tile:Tile = entity.get(TileImage).tile;
 
@@ -147,6 +151,11 @@ class TileMapService {
         
     }
 
+    /**
+     *  Expands the map to the bottom and right and shifts every tile 
+     *  to make room if shifting to the left or up
+     *  @param dir - Direction the map needs to expand
+     */
     function shiftMap(dir:Direction) {
         switch (dir) {
             case RIGHT:
