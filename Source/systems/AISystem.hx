@@ -1,16 +1,22 @@
 package systems;
 
-//import openfl.display.DisplayObject;
-//import openfl.display.DisplayObjectContainer;
-
 import ash.core.Engine;
+import ash.core.Entity;
 import ash.core.NodeList;
 import ash.core.System;
 
+import openfl.display.Tile;
+
 import components.Position;
+import components.Health;
+import components.TileImage;
+
 import components.ai.Walking;
 import components.ai.Mining;
+
 import nodes.AINode;
+
+import services.EntityFactory;
 
 import util.Point;
 import util.Util;
@@ -52,11 +58,28 @@ class AISystem extends System {
 						position.y += Util.sign(walking.destination.y - position.y);
 					}			
 				} else {
+					node.entity.add(new Mining(walking.destination.x, walking.destination.y, walking.block));
 					node.entity.remove(Walking);
 				}
 				continue;
 			}
 
+			if(node.entity.has(Mining)) {
+				var mining:Mining = node.entity.get(Mining);
+				var position:Position = node.position;
+
+				if(Point.distance(position.point, mining.position) == 1) {
+					var blockHealth:Health = mining.block.get(Health);
+					blockHealth.value -= mining.strength;
+
+					var blockTile:TileImage = mining.block.get(TileImage);
+					blockTile.id = 3;
+
+					if(blockHealth.value > 0) continue;
+				} 
+
+				node.entity.remove(Mining);
+			}
 			
 		}
 	}
