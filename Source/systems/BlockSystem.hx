@@ -10,9 +10,11 @@ import ash.core.System;
 
 import components.Health;
 import components.TileImage;
+import components.ai.Walking;
 import components.markers.ClickedEh;
 import components.tocks.BlockTock;
 
+import services.EntityFactory;
 import services.GameDataService;
 import services.TileMapService;
 
@@ -26,6 +28,7 @@ import nodes.BlockNode;
  *  When a block is dead it will request ore and destroy the block
  */
 class BlockSystem extends System {
+	private var engine:Engine;
     private var nodes:NodeList<BlockNode>;
 	private var data:GameDataService;
 
@@ -35,6 +38,7 @@ class BlockSystem extends System {
     }
 	
 	override public function addToEngine(engine:Engine):Void {
+		this.engine = engine;
 		this.nodes = engine.getNodeList(BlockNode);
 		
 	}
@@ -45,15 +49,16 @@ class BlockSystem extends System {
 			if(node.entity.has(ClickedEh)) {
 				node.entity.remove(ClickedEh);
 
-				trace(node.health.value);
-
+				this.engine.getEntityByName("James")
+				.add(new Walking(node.position.x, node.position.y));		
+				/*
 				if(!node.entity.has(BlockTock)) {
 					if(data.miners > 0) {
 						data.useMiner();
 						node.entity.add(new BlockTock( -1 ));
 					}
 					
-				}
+				}*/
 			}
 
 			node.tile.tile.id = 2;
