@@ -50,7 +50,7 @@ class BlockSystem extends System {
 				node.entity.remove(ClickedEh);
 
 				this.engine.getEntityByName("James")
-				.add(new Walking(node.position.x, node.position.y));		
+				.add(new Walking(node.position.x, node.position.y, node.entity));		
 				/*
 				if(!node.entity.has(BlockTock)) {
 					if(data.miners > 0) {
