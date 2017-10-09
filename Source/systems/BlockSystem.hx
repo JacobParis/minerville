@@ -5,10 +5,12 @@ package systems;
 
 import ash.core.Engine;
 import ash.core.Entity;
+import ash.core.Node;
 import ash.core.NodeList;
 import ash.core.System;
 
 import components.Health;
+import components.Ore;
 import components.TileImage;
 import components.ai.Walking;
 import components.markers.ClickedEh;
@@ -19,6 +21,7 @@ import services.GameDataService;
 import services.TileMapService;
 
 import nodes.BlockNode;
+import nodes.OreNode;
 
 /**
  *  This System operates on Block tiles
@@ -29,7 +32,6 @@ import nodes.BlockNode;
  */
 class BlockSystem extends System {
 	private var engine:Engine;
-    private var nodes:NodeList<BlockNode>;
 	private var data:GameDataService;
 
     public function new() {
@@ -39,35 +41,35 @@ class BlockSystem extends System {
 	
 	override public function addToEngine(engine:Engine):Void {
 		this.engine = engine;
-		this.nodes = engine.getNodeList(BlockNode);
 		
 	}
 	
-	override public function update(time:Float):Void {
-		for (node in this.nodes) {
-			//var component:Component = node.component;
+	override public function update(_):Void {
+		for (node in engine.getNodeList(BlockNode)) {
 			if(node.entity.has(ClickedEh)) {
 				node.entity.remove(ClickedEh);
 
 				this.engine.getEntityByName("James")
 				.add(new Walking(node.position.x, node.position.y, node.entity));		
-				/*
-				if(!node.entity.has(BlockTock)) {
-					if(data.miners > 0) {
-						data.useMiner();
-						node.entity.add(new BlockTock( -1 ));
-					}
-					
-				}*/
 			}
 
 			node.tile.tile.id = 2;
 			
 			if(node.health.value == 0) {
-				data.requestOre();
 				data.restoreMiner();
 				TileMapService.instance.destroyBlock(node.entity);
 			}
 		}
+
+		for (node in engine.getNodeList(OreNode)) {
+			if(node.entity.has(ClickedEh)) {
+				node.entity.remove(ClickedEh);
+			
+				this.engine.getEntityByName("James")
+				.add(new Walking(node.position.x, node.position.y, node.entity));		
+				
+			}
+		}
 	}
+
 }

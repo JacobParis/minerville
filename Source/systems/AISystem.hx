@@ -7,8 +7,10 @@ import ash.core.System;
 
 import openfl.display.Tile;
 
+import components.Building;
 import components.Position;
 import components.Health;
+import components.Ore;
 import components.TileImage;
 
 import components.ai.Walking;
@@ -17,6 +19,7 @@ import components.ai.Mining;
 import nodes.AINode;
 
 import services.EntityFactory;
+import services.GameDataService;
 
 import util.Point;
 import util.Util;
@@ -58,8 +61,29 @@ class AISystem extends System {
 						position.y += Util.sign(walking.destination.y - position.y);
 					}			
 				} else {
-					node.entity.add(new Mining(walking.destination.x, walking.destination.y, walking.block));
-					node.entity.remove(Walking);
+					var target = walking.target;
+					if(target.has(Ore)) {
+						node.entity.add(target.remove(Ore));
+						node.entity.remove(Walking);
+						node.entity.add(EntityFactory.instance.getWalkingToBase());
+						EntityFactory.instance.destroyEntity(target);
+					} 
+
+					if(target.has(Health)) {
+						node.entity.add(new Mining(walking.destination.x, walking.destination.y, walking.target));
+						node.entity.remove(Walking);
+					}
+
+					if(target.has(Building)) {
+						trace("Building");
+						if(node.entity.has(Ore)) {
+							trace("Ore");
+							node.entity.remove(Ore);
+							GameDataService.instance.requestOre();
+						}
+						node.entity.remove(Walking);
+					}
+					
 				}
 				continue;
 			}
