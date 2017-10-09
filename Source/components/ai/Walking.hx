@@ -5,11 +5,11 @@ import util.Point;
 
 class Walking {
     public var destination:Point;
-    public var block:Entity;
+    public var target:Entity;
 
-    public function new(x:Float, y:Float, block:Entity) {
+    public function new(x:Float, y:Float, target:Entity) {
         this.destination = new Point(x, y);
-        this.block = block;
+        this.target = target;
     }
 
     
