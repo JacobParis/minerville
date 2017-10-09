@@ -4,9 +4,11 @@ import openfl.display.Tile;
 
 class TileImage {
     public var tile:Tile;
+    public var isForeground:Bool;
 
-    public function new(tile:Tile) {
+    public function new(tile:Tile, isForeground:Bool = false) {
         this.tile = tile;
+        this.isForeground = isForeground;
     }
 
     public var id(get, set):Int;

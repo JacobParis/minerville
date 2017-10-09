@@ -44,7 +44,11 @@ class TileRenderSystem extends System {
     }
 
     private function addToDisplay(node:TileNode):Void {
-		map.addTile(new Point(node.position.x, node.position.y), node.tile.tile);
+        if(node.tile.isForeground) {
+            map.addForegroundTile(node.tile.tile);
+        } else {
+		    map.addBackdropTile(new Point(node.position.x, node.position.y), node.tile.tile);
+        }
     }
 
     private function removeFromDisplay(node:TileNode):Void {

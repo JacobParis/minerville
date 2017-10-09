@@ -97,7 +97,7 @@ class TileMapService {
                 if(id == this.enumMap.get(TileType.FLOOR)) {
                     // Create static tile
                     var tile = new Tile(id, x * GameConfig.tileSize, y * GameConfig.tileSize);
-                    addTile(new Point(x, y), tile);
+                    addBackdropTile(new Point(x, y), tile);
                     continue;
                 }
                 
@@ -108,7 +108,7 @@ class TileMapService {
             // Create base
             var id = this.enumMap.get(TileType.BASE);
             EntityFactory.instance.createBuilding(new Point(centerX, centerY), id, Building.BASE);
-            EntityFactory.instance.createWorker();
+            EntityFactory.instance.createWorker("James");
         });
         
         
@@ -138,7 +138,7 @@ class TileMapService {
         var floorTile = new Tile(this.enumMap.get(TileType.FLOOR), tile.x  , tile.y );
         
         EntityFactory.instance.destroyEntity(entity);
-        addTile(cell, floorTile);
+        addBackdropTile(cell, floorTile);
         
     }
 
@@ -170,7 +170,7 @@ class TileMapService {
                 }
         }
     }
-    public function addTile(point:Point, tile:Tile) {
+    public function addBackdropTile(point:Point, tile:Tile) {
         if(point.x + 1 > GameConfig.tilesWide - GameConfig.tilesLeft) {
             shiftMap(Direction.RIGHT);
         }
@@ -195,6 +195,10 @@ class TileMapService {
         tilemap.addTileAt(tile, tilemap.numTiles + 1);
     }
 
+    public function addForegroundTile(tile:Tile) {
+        tilemap.addTileAt(tile, tilemap.numTiles + 1);
+    }
+    
     public function removeTile(tile:Tile) {
         var point = new Point(tile.x,tile.y);
         if(positionMap.get(point) != null) {

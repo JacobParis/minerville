@@ -20,6 +20,8 @@ import components.Position;
 import components.TileImage;
 import components.Worker;
 
+import components.ai.Walking;
+
 import components.markers.ClickedEh;
 
 import nodes.BlockNode;
@@ -62,7 +64,13 @@ class EntityFactory {
         entity.add(new ClickedEh());
     }
 
-    private function testHit(x:Float, y:Float):Null<Entity> {
+    /**
+     *  Tests if a block is present in a specific cell
+     *  @param x - X Cell
+     *  @param y - Y Cell
+     *  @return Null<Entity>
+     */
+    public function testHit(x:Float, y:Float):Null<Entity> {
         var nodes:NodeList<BlockNode> = engine.getNodeList(BlockNode);
         for(node in nodes) {
             var left = (node.position.x + GameConfig.tilesLeft) * GameConfig.tileSize;
@@ -95,7 +103,7 @@ class EntityFactory {
         var tile:Tile = new Tile(id);
         var building:Entity = new Entity(name.getName())
         .add(new Position(cell.x, cell.y))
-        .add(new TileImage(tile));
+        .add(new TileImage(tile, true));
 
         this.engine.addEntity(building);
         return building;
@@ -112,13 +120,13 @@ class EntityFactory {
         return block;
     }
 
-    public function createWorker():Entity {
+    public function createWorker(name:String):Entity {
         var base:Entity = this.engine.getEntityByName(Building.BASE.getName());
         var position:Position = base.get(Position);
         var tile:Tile = new Tile(5);
-        var worker:Entity = new Entity()
+        var worker:Entity = new Entity(name)
         .add(new Position(position.x + 1, position.y))
-        .add(new TileImage(tile))
+        .add(new TileImage(tile, true))
         .add(new Worker());
         
         this.engine.addEntity(worker);
