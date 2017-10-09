@@ -3,7 +3,7 @@
 	
 	<meta title="Miner" package="" version="1.0.0" company="Jacob Pariseau" />
 	<app main="Main" path="Export" file="miner" />
-	<window background="#000000" fps="20" />
+	<window background="#201530" fps="20" />
 	<window width="360" height="640" />
 	<window orientation="portrait" vsync="false" antialiasing="0" if="cpp" />
 	<source path="Libraries" />
