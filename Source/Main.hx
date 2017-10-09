@@ -14,8 +14,7 @@ class Main extends Sprite {
     private function onEnterFrame(event:Event):Void {
         removeEventListener(Event.ENTER_FRAME, onEnterFrame);
 
-        var game = new Game(this, stage.stageWidth, stage.stageHeight);
-        game.start();
+        new Game(this);
     }
 
     private static function main() {
