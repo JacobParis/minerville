@@ -30,6 +30,14 @@ import services.TileMapService;
 
 import util.Point;
 
+/**
+ *  This Service provides the infrastructure to create and register specific 
+ *  entities so that I don't need to assemble them from components every time
+ *  
+ *  As a second function it allows me to attach markers to entities
+ *  
+ *  As a third function it can test if an entity occupies a specific grid cell
+ */
 class EntityFactory {
     public static var instance(default, null):EntityFactory = new EntityFactory();
 
@@ -84,7 +92,7 @@ class EntityFactory {
     }
 
     public function createBuilding(cell:Point, id:Int, name:Building):Entity {
-        var tile:Tile = new Tile(id, cell.x * GameConfig.tileSize, cell.y * GameConfig.tileSize);
+        var tile:Tile = new Tile(id);
         var building:Entity = new Entity(name.getName())
         .add(new Position(cell.x, cell.y))
         .add(new TileImage(tile));
@@ -94,7 +102,7 @@ class EntityFactory {
     }
 
     public function createBlock(cell:Point, id:Int, health:Int):Entity {
-        var tile:Tile = new Tile(id, cell.x * GameConfig.tileSize, cell.y * GameConfig.tileSize);
+        var tile:Tile = new Tile(id);
         var block:Entity = new Entity()
         .add(new Position(cell.x, cell.y))
         .add(new TileImage(tile))
@@ -105,15 +113,15 @@ class EntityFactory {
     }
 
     public function createWorker():Entity {
-        var base = this.engine.getEntityByName(Building.BASE.getName());
-        var position = base.get(Position);
-
+        var base:Entity = this.engine.getEntityByName(Building.BASE.getName());
+        var position:Position = base.get(Position);
         var tile:Tile = new Tile(5);
         var worker:Entity = new Entity()
         .add(new Position(position.x + 1, position.y))
         .add(new TileImage(tile))
         .add(new Worker());
         
+        this.engine.addEntity(worker);
         return worker;
     }
 }
