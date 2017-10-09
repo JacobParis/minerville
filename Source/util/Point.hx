@@ -82,4 +82,17 @@ class Point
 
 		return result;
 	}
+
+	/**
+	 *  Computes the manhattan distance between two points
+	 *  @param p1 - The first point
+	 *  @param p2 - The second point
+	 *  @return Int
+	 */
+	public static function distance(p1:Point, p2:Point):Int {
+		var x = Util.abs(p1.x - p2.x);
+		var y = Util.abs(p1.y - p2.y);
+
+		return x + y;
+	}
 }
