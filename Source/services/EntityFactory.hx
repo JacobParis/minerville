@@ -16,6 +16,7 @@ import interfaces.InputListener;
 import components.Building;
 import components.GameState;
 import components.Health;
+import components.Ore;
 import components.Position;
 import components.TileImage;
 import components.Worker;
@@ -25,6 +26,7 @@ import components.ai.Walking;
 import components.markers.ClickedEh;
 
 import nodes.BlockNode;
+import nodes.TileNode;
 
 import graphics.AsciiView;
 
@@ -71,7 +73,7 @@ class EntityFactory {
      *  @return Null<Entity>
      */
     public function testHit(x:Float, y:Float):Null<Entity> {
-        var nodes:NodeList<BlockNode> = engine.getNodeList(BlockNode);
+        var nodes:NodeList<TileNode> = engine.getNodeList(TileNode);
         for(node in nodes) {
             var left = (node.position.x + GameConfig.tilesLeft) * GameConfig.tileSize;
             if(x < left) continue;
@@ -99,11 +101,12 @@ class EntityFactory {
         return gameEntity;
     }
 
-    public function createBuilding(cell:Point, id:Int, name:Building):Entity {
+    public function createBuilding(cell:Point, id:Int, name:Buildings):Entity {
         var tile:Tile = new Tile(id);
         var building:Entity = new Entity(name.getName())
         .add(new Position(cell.x, cell.y))
-        .add(new TileImage(tile, true));
+        .add(new TileImage(tile, true))
+        .add(new Building());
 
         this.engine.addEntity(building);
         return building;
@@ -121,7 +124,7 @@ class EntityFactory {
     }
 
     public function createWorker(name:String):Entity {
-        var base:Entity = this.engine.getEntityByName(Building.BASE.getName());
+        var base:Entity = this.engine.getEntityByName(Buildings.BASE.getName());
         var position:Position = base.get(Position);
         var tile:Tile = new Tile(5);
         var worker:Entity = new Entity(name)
@@ -132,9 +135,27 @@ class EntityFactory {
         this.engine.addEntity(worker);
         return worker;
     }
+
+    public function createOre(cell:Point, id:Int):Entity {
+        var tile:Tile = new Tile(id);
+        var ore:Entity = new Entity()
+        .add(new Position(cell.x, cell.y))
+        .add(new TileImage(tile, true))
+        .add(new Ore());
+
+        this.engine.addEntity(ore);
+        return ore;
+    }
+
+    public function getWalkingToBase():Walking {
+        var base:Entity = this.engine.getEntityByName(Buildings.BASE.getName());
+        var position:Position = base.get(Position);
+
+        return new Walking(position.x, position.y, base);
+    }
 }
 
-enum Building {
+enum Buildings {
     BASE;
     REFINERY;
     FACTORY;

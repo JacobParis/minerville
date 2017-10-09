@@ -112,7 +112,7 @@ class TileMapService {
 
             // Create base
             var id = this.enumMap.get(TileType.BASE);
-            EntityFactory.instance.createBuilding(new Point(centerX, centerY), id, Building.BASE);
+            EntityFactory.instance.createBuilding(new Point(centerX, centerY), id, Buildings.BASE);
             EntityFactory.instance.createWorker("James");
         });
         
@@ -121,7 +121,7 @@ class TileMapService {
     }
 
     /**
-     *  Replaces a block with a floor and creates neighbouring blocks in the empty spaces around it
+     *  Replaces a block with ore and creates neighbouring blocks in the empty spaces around it
      *  @param entity - The block to destroy
      */
     public function destroyBlock(entity:Entity) {
@@ -148,6 +148,7 @@ class TileMapService {
         
         EntityFactory.instance.destroyEntity(entity);
         addBackdropTile(cell, floorTile);
+        EntityFactory.instance.createOre(cell, this.enumMap.get(TileType.ORE));
         
     }
 
@@ -237,6 +238,7 @@ enum TileType {
     WALL_DAMAGED;
     BASE;
     WORKER;
+    ORE;
 }
 
 enum Direction {
