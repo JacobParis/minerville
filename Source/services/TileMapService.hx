@@ -31,6 +31,10 @@ import util.Point;
 
 import util.Util;
 
+/**
+ *  This Service should strictly handle the storage and display of tilemap
+ *  assets
+ */
 class TileMapService {
     public static var instance(default, null):TileMapService = new TileMapService();
 
@@ -104,6 +108,7 @@ class TileMapService {
             // Create base
             var id = this.enumMap.get(TileType.BASE);
             EntityFactory.instance.createBuilding(new Point(centerX, centerY), id, Building.BASE);
+            EntityFactory.instance.createWorker();
         });
         
         
@@ -207,6 +212,7 @@ enum TileType {
     WALL;
     WALL_DAMAGED;
     BASE;
+    WORKER;
 }
 
 enum Direction {

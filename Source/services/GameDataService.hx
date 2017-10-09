@@ -2,6 +2,11 @@ package services;
 
 import util.Util;
 
+/**
+ *   This Service should be treated as if it were on the server
+ *   and authenticated all stats and simply takes requests and 
+ *   returns results if they are valid
+ */
 class GameDataService {
     public static var instance(default, null):GameDataService = new GameDataService();
 

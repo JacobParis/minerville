@@ -18,6 +18,13 @@ import services.TileMapService;
 
 import nodes.BlockNode;
 
+/**
+ *  This System operates on Block tiles
+ *  
+ *  When a tile is clicked it will start to mine it
+ *  
+ *  When a block is dead it will request ore and destroy the block
+ */
 class BlockSystem extends System {
     private var nodes:NodeList<BlockNode>;
 	private var data:GameDataService;

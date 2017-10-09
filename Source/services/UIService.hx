@@ -16,6 +16,10 @@ import openfl.geom.Rectangle;
 
 import util.Util;
 
+/**
+ *  This Service displays the UI on a layer above the main game 
+ *  and contains event listeners to detect when UI buttons are clicked
+ */
 class UIService {
     public static var instance(default, null):UIService = new UIService();
 

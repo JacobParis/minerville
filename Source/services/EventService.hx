@@ -9,6 +9,11 @@ import interfaces.InputListener;
 import util.ds.ArrayedQueue;
 import util.Util;
 
+/**
+ *  This Service allows other services to subscribe to events and dispatches
+ *  events when they occur. I should look into replacing this with the Ash
+ *  signal library
+ */
 class EventService {
     public static var instance(default, null):EventService = new EventService();
 

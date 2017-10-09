@@ -23,6 +23,12 @@ import services.GameDataService;
 
 import util.Util;
 
+/**
+ *  This System operates on any entity that has a Tock component
+ *  
+ *  A tock means something needs to happen to it on every iteration
+ *  of the ticker cycle, such as characters moving or mining blocks
+ */
 class TockSystem extends System {
     private var blockNodes:NodeList<BlockTockNode>;
 

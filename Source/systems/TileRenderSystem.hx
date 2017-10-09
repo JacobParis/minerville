@@ -17,6 +17,10 @@ import services.TileMapService;
 
 import util.Point;
 
+/**
+ *  This system displays tile objects using the tilemap as a 
+ *  displaylist replacement
+ */
 class TileRenderSystem extends System {
     private var nodes:NodeList<TileNode>;
 	private var container:DisplayObjectContainer;
