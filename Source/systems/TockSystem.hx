@@ -49,19 +49,6 @@ class TockSystem extends System {
 	}
 
 	public function tock(time:Float):Void {
-		for (node in this.blockNodes) {
-			var blockTock:BlockTock = cast node.tock;
-			var health:Health = node.entity.get(Health);
-			var tile:TileImage = node.entity.get(TileImage);
-			health.value += blockTock.health;
-			tile.tile.id = 3;
-			if(health.value == 0) {
-				node.entity.add(new DeadEh());
-				node.entity.remove(BlockTock);
-			}
-		}
-
-		/** Stat modification	 */
 		var data = GameDataService.instance;
 		if(data.ore > 0) {
 			while(data.currentBake > data.bakeTime) {
