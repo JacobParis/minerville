@@ -11,11 +11,15 @@ import interfaces.InputListener;
 
 import util.Util;
 
+/**
+ *  This Service controls panning and zooming and the inputs required
+ *  to make either of those functions work
+ */
 class CameraService implements InputListener {
     public static var instance(default, null):CameraService = new CameraService();
-
+   
     public var subscribedEvents:Array<String>;
-
+    
     private var startX:Float = 0;
     private var startY:Float = 0;
     private var targetX:Float = 0;
@@ -24,11 +28,11 @@ class CameraService implements InputListener {
 
     private var container:DisplayObjectContainer;
     
-    private var mouseDownEh:Bool = false;
+    private var isMouseDown = false;
     private var mouseX:Float;
     private var mouseY:Float;
 
-    public var isScrolling:Bool = false;
+    public var isScrolling = false;
     private function new() {
     }
     
@@ -63,7 +67,7 @@ class CameraService implements InputListener {
         this.startX = -this.container.x;
         this.startY = -this.container.y;
 
-        this.mouseDownEh = true;
+        this.isMouseDown = true;
     }
 
     public function mouseUp() {
@@ -98,7 +102,7 @@ class CameraService implements InputListener {
             var y = translatedClickY - originY;
             EntityFactory.instance.markEntityAtPosition(x, y, "click");
         }
-        this.mouseDownEh = false;
+        this.isMouseDown = false;
     }
 
     private function zoomCamera() {
@@ -115,7 +119,7 @@ class CameraService implements InputListener {
     }
 
     public function update(time:Float):Void {
-        if(mouseDownEh) {
+        if(isMouseDown) {
             if(!this.isScrolling) {
                 if(Util.fdiff(this.mouseX, container.stage.mouseX) > 5
                 || Util.fdiff(this.mouseY, container.stage.mouseY) > 5) {
