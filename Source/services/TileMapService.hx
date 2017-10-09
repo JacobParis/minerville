@@ -32,7 +32,7 @@ import util.Point;
 import util.Util;
 
 /**
- *  This Service should strictly handle the storage and display of tilemap
+ *  This Service should strictly handle the storage and display of backdrops
  *  assets
  */
 class TileMapService {
@@ -40,7 +40,9 @@ class TileMapService {
 
     private var container:DisplayObjectContainer;
     private var enumMap:EnumValueMap<TileType, Int>;
-    private var tilemap:Tilemap;
+    private var backdrops:Tilemap;
+    private var actives:Tilemap;
+
     private var positionMap:HashMap<Point, Null<Tile>>;
 
 
@@ -62,8 +64,11 @@ class TileMapService {
                 this.enumMap.set(TileType.createByIndex(i), id);
             }
             
-            this.tilemap = new Tilemap(GameConfig.tilesWide * GameConfig.tileSize, GameConfig.tilesHigh * GameConfig.tileSize, tileset);
-            container.addChild(this.tilemap);
+            this.backdrops = new Tilemap(GameConfig.tilesWide * GameConfig.tileSize, GameConfig.tilesHigh * GameConfig.tileSize, tileset);
+            this.actives = new Tilemap(GameConfig.tilesWide * GameConfig.tileSize, GameConfig.tilesHigh * GameConfig.tileSize, tileset);
+            
+            container.addChild(this.backdrops);
+            container.addChild(this.actives);
 
             // Figure out which coordinates will show the center of the visible screen at start
             var virtualWidth:Int = Util.fint(container.stage.stageWidth / GameConfig.tileSize);
@@ -146,29 +151,33 @@ class TileMapService {
         switch (dir) {
             case RIGHT:
                 GameConfig.tilesWide += 1;
-                this.tilemap.width += GameConfig.tileSize;
+                this.backdrops.width += GameConfig.tileSize;
             case LEFT:
                 GameConfig.tilesWide += 1;
                 GameConfig.tilesLeft += 1;
-                this.tilemap.width += GameConfig.tileSize;
+                this.backdrops.width += GameConfig.tileSize;
 
-                for(i in 0...this.tilemap.numTiles) {
-                    var tile:Tile = this.tilemap.getTileAt(i);
+                for(i in 0...this.backdrops.numTiles) {
+                    var tile:Tile = this.backdrops.getTileAt(i);
                     tile.x += GameConfig.tileSize;
                 }
             case DOWN:
                 GameConfig.tilesHigh += 1;
-                this.tilemap.height += GameConfig.tileSize;
+                this.backdrops.height += GameConfig.tileSize;
             case UP:
                 GameConfig.tilesHigh += 1;
                 GameConfig.tilesUp += 1;
-                this.tilemap.height += GameConfig.tileSize;
+                this.backdrops.height += GameConfig.tileSize;
 
-                for(i in 0...this.tilemap.numTiles) {
-                    var tile:Tile = this.tilemap.getTileAt(i);
+                for(i in 0...this.backdrops.numTiles) {
+                    var tile:Tile = this.backdrops.getTileAt(i);
                     tile.y += GameConfig.tileSize;
                 }
         }
+
+        //The actives will always be fully enclosed in backdrops so we can just cheat
+        this.actives.width = this.backdrops.width;
+        this.actives.height = this.backdrops.height;
     }
     public function addBackdropTile(point:Point, tile:Tile) {
         if(point.x + 1 > GameConfig.tilesWide - GameConfig.tilesLeft) {
@@ -189,14 +198,14 @@ class TileMapService {
         }
 
         if(positionMap.get(point) != null) {
-            tilemap.removeTile(positionMap.get(point));
+            backdrops.removeTile(positionMap.get(point));
         }
         positionMap.set(point, tile);
-        tilemap.addTileAt(tile, tilemap.numTiles + 1);
+        backdrops.addTileAt(tile, backdrops.numTiles + 1);
     }
 
     public function addForegroundTile(tile:Tile) {
-        tilemap.addTileAt(tile, tilemap.numTiles + 1);
+        actives.addTileAt(tile, actives.numTiles + 1);
     }
     
     public function removeTile(tile:Tile) {
@@ -204,7 +213,9 @@ class TileMapService {
         if(positionMap.get(point) != null) {
             positionMap.set(point, null);
         }
-        tilemap.removeTile(tile);
+
+        actives.removeTile(tile);
+        backdrops.removeTile(tile);
     }
 
     
