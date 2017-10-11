@@ -21,4 +21,7 @@ class Main extends Sprite {
         Lib.current.addChild(new Main());
     }
     
+    public static function log(v:Dynamic) {
+        js.Browser.window.console.log(v);
+    }
 }
