@@ -5,18 +5,12 @@ import ash.core.Entity;
 import ash.core.NodeList;
 import ash.core.System;
 
-import openfl.display.Tile;
-
-import components.Building;
-import components.Busy;
 import components.Position;
 import components.Health;
 import components.Ore;
 import components.Task;
 import components.TileImage;
 
-import components.ai.Available;
-import components.ai.Walking;
 import components.ai.Mining;
 
 import nodes.AINode;
