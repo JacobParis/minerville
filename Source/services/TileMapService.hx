@@ -22,9 +22,11 @@ import ash.core.Engine;
 import ash.core.Entity;
 
 import components.Health;
+import components.Task;
 import components.TileImage;
 
 import services.EntityFactory;
+import services.TaskService;
 
 import util.ds.ArrayedQueue;
 import util.Point;
@@ -114,6 +116,8 @@ class TileMapService {
             var id = this.enumMap.get(TileType.BASE);
             EntityFactory.instance.createBuilding(new Point(centerX, centerY), id, Buildings.BASE);
             EntityFactory.instance.createWorker("James");
+            EntityFactory.instance.createWorker("Jeffery");
+            EntityFactory.instance.createWorker("Urist McJohn");
         });
         
         
@@ -139,7 +143,10 @@ class TileMapService {
             if (neighbourTile == null) {
                 var id = this.enumMap.get(TileType.WALL);
     
-                EntityFactory.instance.createBlock(new Point(neighbour.x, neighbour.y), id, Util.anyOneOf([2,2,3,3,4,4,4,5,6,7,8,9]));
+                var block = EntityFactory.instance.createBlock(new Point(neighbour.x, neighbour.y), id, Util.anyOneOf([2,2,3,3,4,4,4,5,6,7,8,9]));
+                if(Util.rnd(0,5) > 0) {
+                    TaskService.instance.addTask(new Task(Skills.MINE, block));
+                }
             }
 
         }
@@ -148,7 +155,10 @@ class TileMapService {
         
         EntityFactory.instance.destroyEntity(entity);
         addBackdropTile(cell, floorTile);
-        EntityFactory.instance.createOre(cell, this.enumMap.get(TileType.ORE));
+
+        // TODO this should not be here
+        var ore:Entity = EntityFactory.instance.createOre(cell, this.enumMap.get(TileType.ORE));
+        TaskService.instance.addTask(new Task(Skills.CARRY, ore));
         
     }
 

@@ -18,6 +18,7 @@ import components.GameState;
 import components.Health;
 import components.Ore;
 import components.Position;
+import components.Task;
 import components.TileImage;
 import components.Worker;
 
@@ -30,10 +31,11 @@ import nodes.TileNode;
 
 import graphics.AsciiView;
 
+import services.TaskService;
 import services.TileMapService;
 
 import util.Point;
-
+import util.Util;
 /**
  *  This Service provides the infrastructure to create and register specific 
  *  entities so that I don't need to assemble them from components every time
@@ -128,7 +130,7 @@ class EntityFactory {
         var position:Position = base.get(Position);
         var tile:Tile = new Tile(5);
         var worker:Entity = new Entity(name)
-        .add(new Position(position.x + 1, position.y))
+        .add(new Position(position.x + Util.anyOneOf([-1, 1]), position.y + Util.anyOneOf([-1, 1])))
         .add(new TileImage(tile, true))
         .add(new Worker());
         
@@ -147,11 +149,10 @@ class EntityFactory {
         return ore;
     }
 
-    public function getWalkingToBase():Walking {
+    public function getWalkingToBase():Task {
         var base:Entity = this.engine.getEntityByName(Buildings.BASE.getName());
-        var position:Position = base.get(Position);
 
-        return new Walking(position.x, position.y, base);
+        return new Task(Skills.WALK, base);
     }
 }
 

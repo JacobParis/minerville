@@ -8,15 +8,20 @@ import ash.core.System;
 import openfl.display.Tile;
 
 import components.Building;
+import components.Busy;
 import components.Position;
 import components.Health;
 import components.Ore;
+import components.Task;
 import components.TileImage;
 
+import components.ai.Available;
 import components.ai.Walking;
 import components.ai.Mining;
 
 import nodes.AINode;
+import nodes.MiningWorkerNode;
+import nodes.TaskWorkerNode;
 
 import services.EntityFactory;
 import services.GameDataService;
@@ -26,6 +31,7 @@ import util.Util;
 
 class AISystem extends System {
     private var nodes:NodeList<AINode>;
+	private var engine:Engine;
 
     public function new() {
         super();
@@ -33,7 +39,7 @@ class AISystem extends System {
 	
 	override public function addToEngine(engine:Engine):Void {
 		this.nodes = engine.getNodeList(AINode);
-		
+		this.engine = engine;
 	}
 	
 	override public function update(time:Float):Void {
@@ -44,67 +50,67 @@ class AISystem extends System {
 	}
 
 	public function tock(time:Float):Void {
-		for (node in this.nodes) {
+		for (node in engine.getNodeList(TaskWorkerNode)) {
+			var destination:Point = node.task.location();
+			var position:Position = node.position;
+			// Travel to task
+			if(Point.distance(node.position.point, destination) > 1) {
+				var deltaX = Util.diff(position.x, destination.x);
+				var deltaY = Util.diff(position.y, destination.y);
+				trace(deltaX, deltaY);
 
-			if(node.entity.has(Walking)) {
-				var walking:Walking = node.entity.get(Walking);
-				var position:Position = node.position;
-
-				if(Point.distance(position.point, walking.destination) > 1) {
-					var deltaX = Util.diff(position.x, walking.destination.x);
-					var deltaY = Util.diff(position.y, walking.destination.y);
-					trace(deltaX, deltaY);
-
-					if(deltaX > deltaY) {
-						position.x += Util.sign(walking.destination.x - position.x);
-					} else {
-						position.y += Util.sign(walking.destination.y - position.y);
-					}			
+				if(deltaX > deltaY) {
+					position.x += Util.sign(destination.x - position.x);
 				} else {
-					var target = walking.target;
-					if(target.has(Ore)) {
-						node.entity.add(target.remove(Ore));
-						node.entity.remove(Walking);
-						node.entity.add(EntityFactory.instance.getWalkingToBase());
-						EntityFactory.instance.destroyEntity(target);
-					} 
-
-					if(target.has(Health)) {
-						node.entity.add(new Mining(walking.destination.x, walking.destination.y, walking.target));
-						node.entity.remove(Walking);
-					}
-
-					if(target.has(Building)) {
-						trace("Building");
-						if(node.entity.has(Ore)) {
-							trace("Ore");
-							node.entity.remove(Ore);
-							GameDataService.instance.requestOre();
-						}
-						node.entity.remove(Walking);
-					}
-					
+					position.y += Util.sign(destination.y - position.y);
+				}			
+			} else {
+				Main.log(node.entity.components);
+				switch(node.task.action) {
+					case MINE: mineBlock(node.entity, node.task.target);
+					case CARRY: takeOreToBase(node.entity, node.task.target);
+					case ATTACK: 1 + 1;
+					case WALK: completeWalk(node.entity, node.task.target);
 				}
-				continue;
 			}
+		}
 
-			if(node.entity.has(Mining)) {
-				var mining:Mining = node.entity.get(Mining);
-				var position:Position = node.position;
 
-				if(Point.distance(position.point, mining.position) == 1) {
-					var blockHealth:Health = mining.block.get(Health);
-					blockHealth.value -= mining.strength;
+		for (node in engine.getNodeList(MiningWorkerNode)) {
+			var position:Position = node.position;
 
-					var blockTile:TileImage = mining.block.get(TileImage);
-					blockTile.id = 3;
+			var blockHealth:Health = node.mining.block.get(Health);
+			blockHealth.value -= node.mining.strength;
 
-					if(blockHealth.value > 0) continue;
-				} 
+			var blockTile:TileImage = node.mining.block.get(TileImage);
+			blockTile.id = 3;
 
-				node.entity.remove(Mining);
+			if(blockHealth.value > 0) continue;
+			Main.log(node.entity.components);
+			node.entity.remove(Mining);
+		}
+	}
+
+	private function mineBlock(entity:Entity, blockEntity:Entity) {
+		entity.remove(Task);
+		entity.add(new Mining(blockEntity));
+	}
+	private function takeOreToBase(entity:Entity, oreEntity:Entity) {
+		entity.remove(Task);
+		entity.add(oreEntity.remove(Ore));
+		entity.add(EntityFactory.instance.getWalkingToBase());
+		EntityFactory.instance.destroyEntity(oreEntity);
+	}
+
+	private function completeWalk(entity:Entity, targetEntity:Entity) {
+		entity.remove(Task);
+		trace("Finished walking...");
+		if(targetEntity.name == "Base") {
+			trace("... to the base!");
+			if(entity.has(Ore)) {
+				entity.remove(Ore);
+				GameDataService.instance.requestOre();
 			}
-			
 		}
 	}
 }
