@@ -1,8 +1,9 @@
 package components;
 
 class Ore {
-    
-    public function new() {
+    public var id:Int;
 
+    public function new(id:Int) {
+        this.id = id;
     }
 }
