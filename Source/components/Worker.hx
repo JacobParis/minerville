@@ -2,12 +2,14 @@ package components;
 
 import services.TaskService;
 import util.Point;
+import util.Util;
 
 class Worker {
-    public var miningExperience:Float;
-    public var carryExperience:Float;
-    public var attackExperience:Float;
+    public var miningExperience:Float = 10;
+    public var carryExperience:Float = 10;
+    public var attackExperience:Float = 10;
 
+    public var estimationTweak:Float;
     public function new() {}
 
     /** A worker is likely to accept any task that surpasses its threshold. 
@@ -25,7 +27,7 @@ class Worker {
     }
 
     inline function walkingSpeed():Float {
-        return 1.0 + this.carryExperience;
+        return 1.0;// + this.carryExperience;
     }
    
     inline function carryLimit():Float {
@@ -44,42 +46,58 @@ class Worker {
 
         switch(task.action) {
             case MINE: {
-                return task.difficulty / this.miningSpeed() + walkingTime;
+                return 10 / this.miningSpeed() + walkingTime + this.estimationTweak;
             }
             case WALK: {
-                return walkingTime;
+                return walkingTime + this.estimationTweak;
             }
             case CARRY: {
-                return Point.distance(new Point(10,10), task.location()) / walkingSpeed() + walkingTime;
+                return Point.distance(new Point(10,10), task.location()) / walkingSpeed() + walkingTime + this.estimationTweak;
             }
             case ATTACK: {
-                return task.difficulty / attackDamage();
+                return task.difficulty / attackDamage() + this.estimationTweak;
             }
         }
     }
 
+    public function tweakEstimations(amount:Float) {
+        this.estimationTweak += amount / Util.rnd(5, 10);
+        trace(this.estimationTweak);
+    }
     /**
      *  Train a skill. Should be called every time a task is completed
      *  @param skill - The skill to train
      */
-    public function train(skill:Skills):Void {
+    public function train(skill:Skills, name:String = "unnamed"):Void {
         var x = 1.01;
         switch(skill) {
             case MINE: {
-                buff(this.miningExperience, x, 3);
-                debuff(this.carryExperience, x, 1);
+                this.miningExperience = buff(this.miningExperience, x, 3);
+                this.carryExperience = debuff(this.carryExperience, x, 1);
+
+                //trace("Mine Complete by " + name + "!");
+                //trace("    Mining: " + (this.miningExperience));
+                //trace("    Carry: " + (this.carryExperience));
             }
             case WALK: {}
             case CARRY: {
-                buff(this.carryExperience, x, 4);
-                debuff(this.miningExperience, x, 1);
+                this.carryExperience = buff(this.carryExperience, x, 3);
+                this.miningExperience =  debuff(this.miningExperience, x, 1);
+                //trace("Carry Complete by " + name + "!");
+                //trace("    Mining: " + (this.miningExperience));
+                //trace("    Carry: " + (this.carryExperience ));
             }
             case ATTACK: {
-                buff(this.attackExperience, x, 4);
-                debuff(this.miningExperience, x, 2);
-                debuff(this.carryExperience, x, 2);
+                this.attackExperience = buff(this.attackExperience, x, 4);
+                this.miningExperience = debuff(this.miningExperience, x, 2);
+                this.carryExperience = debuff(this.carryExperience, x, 2);
             }
         }
+
+        //trace("Experience: {");
+        //trace("    Mining: " + this.miningExperience);
+        //trace("    Carry: " + this.carryExperience);
+        //trace("}");
     }
 
     inline function buff(value:Float, amount:Float, times:Int):Float {

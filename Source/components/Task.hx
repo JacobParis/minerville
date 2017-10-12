@@ -12,6 +12,9 @@ class Task implements Prioritizable {
     public var action:Skills;
     public var difficulty:Float = 1;
 
+    public var timeTaken:Float;
+    public var estimatedTime:Float;
+
     public var bidders:Array<Entity>;
     public var timePosted:Float;
     public var priority(default, null):Float;

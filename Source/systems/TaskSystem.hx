@@ -1,13 +1,16 @@
 package systems;
 
 import ash.core.Engine;
+import ash.core.Entity;
 import ash.core.NodeList;
 import ash.core.System;
 
 import components.ai.Mining;
 
+import components.Position;
 import components.Task;
 import components.TaskBid;
+import components.Worker;
 
 import nodes.AINode;
 import nodes.BidNode;
@@ -16,6 +19,7 @@ import nodes.TaskWorkerNode;
 
 import services.TaskService;
 
+import util.Util;
 class TaskSystem extends System {
 	private var engine:Engine;
 	private var tasks:TaskService;
@@ -46,7 +50,6 @@ class TaskSystem extends System {
 				if(task.timePosted == 0) task.timePosted = currentTime;
 
 				for (node in this.nodes) {
-					trace("Available Node");
 					// Remove workers that have tasks
 					if(node.entity.has(Task)) continue;
 					if(node.entity.has(Mining)) continue;
@@ -67,9 +70,7 @@ class TaskSystem extends System {
 					var base = (1.0 / task.difficulty) - threshold;
 					suitability = base + (currentTime - task.timePosted) / 10000.0;
 
-					trace(suitability, threshold);
-
-					if(suitability > 0) {
+					if(suitability > 0) { // Currently returning values around 0.9
 						node.entity.add(new TaskBid(task, suitability));
 					}
 				}
@@ -81,14 +82,39 @@ class TaskSystem extends System {
 	
 	
 	public function tock(time:Float):Void {
-		for (node in engine.getNodeList(BidNode)) {
-			var task:Task = node.bid.task;
-			var queue = TaskService.instance.queue;
-			if(queue.contains(task)) {
-				TaskService.instance.queue.remove(task);
-				node.entity.add(task);
+		/**
+			 * The bid system chooses the best worker for the job out of
+			 *  all the workers that have applied for it. 
+			 */
+
+		var queue = TaskService.instance.queue;
+		for(task in queue) {
+			// If there are no longer available workers, quit
+			if(engine.getNodeList(BidNode).empty) return;
+			
+			var bestBid = {
+				value: 0.0,
+				entity: new Entity()
+			};
+
+			for (node in engine.getNodeList(BidNode)) {
+				if(task == node.bid.task) {
+					if(node.bid.value > bestBid.value) {
+						bestBid.value = node.bid.value;
+						bestBid.entity = node.entity;
+					}
+
+					bestBid.entity.remove(TaskBid);
+				}
 			}
-			node.entity.remove(TaskBid);
+
+			if(bestBid.value > 0) {
+				var worker:Worker = bestBid.entity.get(Worker);
+				var position:Position = bestBid.entity.get(Position);
+				task.estimatedTime = worker.estimateTaskLength(task, position.point);
+				bestBid.entity.add(task);
+				TaskService.instance.queue.remove(task);
+			}
 		}
 	}
 	

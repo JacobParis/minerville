@@ -11,14 +11,14 @@ import util.Point;
 import util.Util;
 
 import util.ds.Prioritizable;
-import util.ds.PriorityQueue;
+import util.ds.ArrayedQueue;
 import util.ds.Queue;
 class TaskService {
     public static var instance(default, null):TaskService = new TaskService();
     public var queue:Queue<Task>;
 
     private function new() {
-        this.queue = new PriorityQueue();
+        this.queue = new ArrayedQueue();
     }
     
     public function initialize():TaskService {
@@ -26,8 +26,6 @@ class TaskService {
     }
 	
     public function addTask(task:Task) {
-        trace("Task Added");
-        trace("Difficulty: " + task.difficulty);
         this.queue.enqueue(task);
     }
 }
