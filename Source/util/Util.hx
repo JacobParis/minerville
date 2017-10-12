@@ -30,6 +30,10 @@ class Util
 		return Math.floor(Math.random() * (max - min + 1)) + min;
 	}	
 
+	public static function chance(chance:Float):Bool {
+		return rnd(0, 100) < chance * 100;
+	}
+	
     public static function roundTo(value:Float, precision:Int): Float
     {
         var factor = Math.pow(10, precision);

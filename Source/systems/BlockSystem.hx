@@ -13,6 +13,7 @@ import components.Health;
 import components.Ore;
 import components.Task;
 
+import components.Worker;
 import components.TileImage;
 import components.ai.Walking;
 import components.markers.ClickedEh;
@@ -25,6 +26,8 @@ import services.TileMapService;
 
 import nodes.BlockNode;
 import nodes.OreNode;
+
+import util.Util;
 
 /**
  *  This System operates on Block tiles
@@ -63,12 +66,34 @@ class BlockSystem extends System {
 			if(node.health.value == 0) {
 				TileMapService.instance.destroyBlock(node.entity);
 			}
+
+			
 		}
 
 		for (node in engine.getNodeList(OreNode)) {
 			if(node.entity.has(ClickedEh)) {
 				node.entity.remove(ClickedEh);
 
+				TaskService.instance.addTask(new Task(Skills.CARRY, node.entity));
+			}
+		}
+	}
+
+	public function tock(_) {
+		for (node in engine.getNodeList(BlockNode)) {
+			// Randomly ask to be mined
+			if(Util.rnd(0, 100) == 0) {
+				TaskService.instance.addTask(new Task(Skills.MINE, node.entity));
+			}
+		}
+
+		for (node in engine.getNodeList(OreNode)) {
+			if(node.entity.has(Worker)) {
+				engine.getNodeList(OreNode).remove(node);
+				continue;
+			}
+			// Randomly ask to be collected
+			if(Util.rnd(0, 3) == 0) {
 				TaskService.instance.addTask(new Task(Skills.CARRY, node.entity));
 			}
 		}
