@@ -26,6 +26,7 @@ import components.ai.Walking;
 
 import components.markers.ClickedEh;
 
+import nodes.AINode;
 import nodes.BlockNode;
 import nodes.TileNode;
 
@@ -69,9 +70,9 @@ class EntityFactory {
     }
 
     /**
-     *  Tests if a block is present in a specific cell
-     *  @param x - X Cell
-     *  @param y - Y Cell
+     *  Tests if a block is present in a specific pixel
+     *  @param x - X Pixel
+     *  @param y - Y Pixel
      *  @return Null<Entity>
      */
     public function testHit(x:Float, y:Float):Null<Entity> {
@@ -93,6 +94,61 @@ class EntityFactory {
         }
         return null;
     }
+
+    /**
+     *  Tests if a block is present in a specific cell
+     *  @param x - X Cell
+     *  @param y - Y Cell
+     *  @return Null<Entity>
+     */
+    public function blockAt(x:Float, y:Float):Null<Entity> {
+        var nodes:NodeList<TileNode> = engine.getNodeList(TileNode);
+        for(node in nodes) {
+            if(node.position.x == x
+            && node.position.y == y) {
+                return node.entity;
+            }
+        }
+        return null;
+    }
+
+     /**
+     *  Tests if a worker is present in a specific cell
+     *  @param x - X Cell
+     *  @param y - Y Cell
+     *  @return Null<Entity>
+     */
+    public function playerAt(x:Float, y:Float):Null<Entity> {
+        var nodes:NodeList<AINode> = engine.getNodeList(AINode);
+        for(node in nodes) {
+            if(node.position.x == x
+            && node.position.y == y) {
+                return node.entity;
+            }
+        }
+        return null;
+    }
+
+    /**
+     *  Swap two components from one entity to another
+     *  @param entity1 - 
+     *  @param entity2 - 
+     *  @param componentClass - The component to swap
+     */
+    public function tradeComponents(entity1:Entity, entity2:Entity, componentClass:Class<Dynamic>) {
+        var tempComponent = entity1.get(componentClass);
+        var temp2Component = entity2.get(componentClass);
+		if(tempComponent != null && temp2Component != null) {
+            entity1.remove(componentClass);
+            entity2.remove(componentClass);
+			entity1.add(temp2Component);
+			entity2.add(tempComponent);
+		} else if (entity1.has(componentClass)) {
+			entity2.add(entity1.remove(componentClass));
+		} else if (entity2.has(componentClass)) {
+			entity1.add(entity2.remove(componentClass));
+		}
+	}
 
     /* Create Game Entity */
     public function createGame():Entity {
@@ -143,7 +199,7 @@ class EntityFactory {
         var ore:Entity = new Entity()
         .add(new Position(cell.x, cell.y))
         .add(new TileImage(tile, true))
-        .add(new Ore());
+        .add(new Ore(id));
 
         this.engine.addEntity(ore);
         return ore;

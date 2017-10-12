@@ -41,7 +41,7 @@ class TileMapService {
     public static var instance(default, null):TileMapService = new TileMapService();
 
     private var container:DisplayObjectContainer;
-    private var enumMap:EnumValueMap<TileType, Int>;
+    public var enumMap:EnumValueMap<TileType, Int>;
     private var backdrops:Tilemap;
     private var actives:Tilemap;
 
@@ -115,10 +115,17 @@ class TileMapService {
             // Create base
             var id = this.enumMap.get(TileType.BASE);
             EntityFactory.instance.createBuilding(new Point(centerX, centerY), id, Buildings.BASE);
-            EntityFactory.instance.createWorker("James");
-            EntityFactory.instance.createWorker("Jeffery");
-            EntityFactory.instance.createWorker("Urist McJohn");
+            EntityFactory.instance.createWorker("Alice");
+            EntityFactory.instance.createWorker("Bob");
+            EntityFactory.instance.createWorker("Carol");
+            //EntityFactory.instance.createWorker("Doug");
+            //EntityFactory.instance.createWorker("Evelyn");
+            //EntityFactory.instance.createWorker("Fred");
+            //EntityFactory.instance.createWorker("Georgia");
+
+
         });
+
         
         
         return this;
@@ -144,9 +151,7 @@ class TileMapService {
                 var id = this.enumMap.get(TileType.WALL);
     
                 var block = EntityFactory.instance.createBlock(new Point(neighbour.x, neighbour.y), id, Util.anyOneOf([2,2,3,3,4,4,4,5,6,7,8,9]));
-                if(Util.rnd(0,5) > 0) {
-                    TaskService.instance.addTask(new Task(Skills.MINE, block));
-                }
+                TaskService.instance.addTask(new Task(Skills.MINE, block));
             }
 
         }
@@ -248,6 +253,7 @@ enum TileType {
     WALL_DAMAGED;
     BASE;
     WORKER;
+    WORKER_ORE;
     ORE;
 }
 
