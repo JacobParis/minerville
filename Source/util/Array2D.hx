@@ -164,7 +164,7 @@ class Array2D<T>
 			for(x in 0...this.width) {
 				var cell = this.get(x, y);
 				if(cell == null) {
-					row += "\u25A8";
+					row += "\u25C6";
 				} else if(cast cell) {
 					row += "\u2B1B";
 				} else {

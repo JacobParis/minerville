@@ -78,14 +78,14 @@ class TileMapService {
 
             // Draw a diamond shaped tile pattern with walls at the edge
             var startArea = [
-                0,  0,  0,  2,  2, 0,  0,  0,
+                0,  0,  2,  2,  2, 2,  0,  0,
+                0,  2,  2,  1,  7, 2,  2,  0,
+                2,  2,  1,  1,  1, 2,  2,  2,
+                2,  1,  1,  1,  1, 2,  7,  2,
+                2,  7,  1,  1,  1, 7,  7,  2,
+                2,  2,  2,  1,  1, 2,  2,  2,
                 0,  0,  2,  1,  7, 2,  0,  0,
-                0,  2,  1,  1,  1, 2,  2,  0,
-                2,  1,  1,  1,  2, 2,  7,  2,
-                2,  7,  1,  2,  1, 7,  7,  2,
-                0,  2,  2,  1,  1, 2,  2,  0,
-                0,  0,  2,  1,  7, 2,  0,  0,
-                0,  0,  0,  2,  2, 0,  0,  0
+                0,  0,  2,  2,  2, 2,  0,  0
             ];
 
             var centerX:Int = Util.fint(virtualWidth / 2);
@@ -126,10 +126,10 @@ class TileMapService {
             var id = this.enumMap.get(TileType.BASE);
             EntityFactory.instance.createBuilding(new Point(centerX, centerY), id, Buildings.BASE);
             EntityFactory.instance.createWorker("Alice");
-            //EntityFactory.instance.createWorker("Bob");
-            //EntityFactory.instance.createWorker("Carol");
-            //EntityFactory.instance.createWorker("Doug");
-            //EntityFactory.instance.createWorker("Evelyn");
+            EntityFactory.instance.createWorker("Bob");
+            EntityFactory.instance.createWorker("Carol");
+            EntityFactory.instance.createWorker("Doug");
+            EntityFactory.instance.createWorker("Evelyn");
             //EntityFactory.instance.createWorker("Fred");
             //EntityFactory.instance.createWorker("Georgia");
 

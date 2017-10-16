@@ -53,13 +53,12 @@ class TaskSystem extends System {
 	
 	
 	public function tock(time:Float):Void {
-
 		if(service.hasTasks()) {
 			// Run through the list of tasks
 			for(task in service.getAllTasks()) {
 				if(task.timePosted == 0) task.timePosted = currentTime;
 				for (node in this.nodes) {
-					//trace(node.entity.name);
+					
 					
 					// Remove workers that have tasks
 					if(node.entity.has(Task)) {
@@ -79,12 +78,9 @@ class TaskSystem extends System {
 						if(bid.task.priority >= task.priority) {
 							//trace("		has a higher priority bid.");
 							continue;
-						} else {
-							node.entity.remove(TaskBid);
 						}
 					}
 
-					//trace("		has no higher priority bids");
 					var suitability:Float;
 					var threshold:Float;
 					switch(task.action) {
@@ -93,15 +89,17 @@ class TaskSystem extends System {
 						case CARRY: threshold = node.worker.carryThreshold();
 						case ATTACK: threshold = node.worker.attackThreshold();
 					}
-
+					trace(node.entity.name);
+					
 					var base = (1.0 / task.difficulty) - threshold;
 					suitability = base + (currentTime - task.timePosted) / 10000.0;
-
-					if(Util.chance(suitability/2)) { // Currently returning values around 0.9
-						//trace("		and made a bid!");
+					if(Util.chance(suitability) || task.priority > 1) { // Currently returning values around 0.9
+						trace("		and made a bid!");
+							node.entity.remove(TaskBid);
+						
 						node.entity.add(new TaskBid(task, suitability));
 					} else {
-						//trace("		and chose not to make a bid.");
+						trace("		and chose not to make a bid.");
 					}
 				}
 			}
@@ -116,7 +114,7 @@ class TaskSystem extends System {
 		for(task in queue) {
 			// If there are no longer available workers, quit
 			if(engine.getNodeList(BidNode).empty) {
-				trace("There are no available workers.");
+				//trace("There are no available workers.");
 				return;
 			}
 
@@ -149,6 +147,10 @@ class TaskSystem extends System {
 				bestBid.entity.add(task);
 				TaskService.instance.removeTask(task);
 			}
+		}
+
+		for (node in engine.getNodeList(BidNode)) {
+			node.entity.remove(TaskBid);
 		}
 	}
 	
