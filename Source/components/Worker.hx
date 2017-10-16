@@ -100,6 +100,28 @@ class Worker {
         //trace("}");
     }
 
+    /**
+     *  Train a skill. Should be called every time a task is completed
+     *  @param skill - The skill to train
+     */
+    public function detrain(skill:Skills, name:String = "unnamed"):Void {
+        var x = 1.01;
+        switch(skill) {
+            case MINE: {
+            }
+            case WALK: {}
+            case CARRY: {
+            }
+            case ATTACK: {
+            }
+        }
+
+        //trace("Experience: {");
+        //trace("    Mining: " + this.miningExperience);
+        //trace("    Carry: " + this.carryExperience);
+        //trace("}");
+    }
+
     inline function buff(value:Float, amount:Float, times:Int):Float {
         return value * Math.pow(amount, times);
     }

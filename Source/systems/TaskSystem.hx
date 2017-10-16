@@ -22,8 +22,10 @@ import services.TaskService;
 import util.Util;
 class TaskSystem extends System {
 	private var engine:Engine;
-	private var tasks:TaskService;
+	private var service:TaskService;
 	private var nodes:NodeList<AINode>;
+
+	private var tasks:Array<Task>;
 
 	private var currentTime:Float;
     public function new() {
@@ -33,7 +35,7 @@ class TaskSystem extends System {
 	override public function addToEngine(engine:Engine):Void {
 		this.engine = engine;
 		this.nodes = engine.getNodeList(AINode);
-		this.tasks = TaskService.instance;
+		this.service = TaskService.instance;
 	}
 	
 	override public function update(time:Float):Void {
@@ -44,20 +46,45 @@ class TaskSystem extends System {
 		bottom of the queue and are not removed. */
 		currentTime += time;
 
-		if(!tasks.queue.isEmpty()) {
-			// Run through the list of tasks
-			for(task in tasks.queue) {
-				if(task.timePosted == 0) task.timePosted = currentTime;
+		
 
+		
+	}
+	
+	
+	public function tock(time:Float):Void {
+
+		if(service.hasTasks()) {
+			// Run through the list of tasks
+			for(task in service.getAllTasks()) {
+				if(task.timePosted == 0) task.timePosted = currentTime;
 				for (node in this.nodes) {
-					// Remove workers that have tasks
-					if(node.entity.has(Task)) continue;
-					if(node.entity.has(Mining)) continue;
+					//trace(node.entity.name);
 					
+					// Remove workers that have tasks
+					if(node.entity.has(Task)) {
+						//trace("		has a task");
+						continue;
+					}
+
+					if(node.entity.has(Mining)) {
+						//trace("		is busy mining");
+						continue;
+					}
+					
+					//trace("		has no task and is not mining");
 					if(node.entity.has(TaskBid)) {
 						var bid:TaskBid = node.entity.get(TaskBid);
 						if(bid.task == task) continue;
+						if(bid.task.priority >= task.priority) {
+							//trace("		has a higher priority bid.");
+							continue;
+						} else {
+							node.entity.remove(TaskBid);
+						}
 					}
+
+					//trace("		has no higher priority bids");
 					var suitability:Float;
 					var threshold:Float;
 					switch(task.action) {
@@ -70,35 +97,42 @@ class TaskSystem extends System {
 					var base = (1.0 / task.difficulty) - threshold;
 					suitability = base + (currentTime - task.timePosted) / 10000.0;
 
-					if(suitability > 0) { // Currently returning values around 0.9
+					if(Util.chance(suitability/2)) { // Currently returning values around 0.9
+						//trace("		and made a bid!");
 						node.entity.add(new TaskBid(task, suitability));
+					} else {
+						//trace("		and chose not to make a bid.");
 					}
 				}
 			}
 		}
-
-		
-	}
-	
-	
-	public function tock(time:Float):Void {
 		/**
 			 * The bid system chooses the best worker for the job out of
 			 *  all the workers that have applied for it. 
 			 */
 
-		var queue = TaskService.instance.queue;
+		
+		var queue = service.getAllTasks();
 		for(task in queue) {
 			// If there are no longer available workers, quit
-			if(engine.getNodeList(BidNode).empty) return;
-			
+			if(engine.getNodeList(BidNode).empty) {
+				trace("There are no available workers.");
+				return;
+			}
+
+			if(task.target == null) {
+				trace("Task target is null");
+				TaskService.instance.removeTask(task);
+			}
+
 			var bestBid = {
 				value: 0.0,
 				entity: new Entity()
 			};
 
 			for (node in engine.getNodeList(BidNode)) {
-				if(task == node.bid.task) {
+				if(task.target == node.bid.task.target
+				&& task.action == node.bid.task.action) {
 					if(node.bid.value > bestBid.value) {
 						bestBid.value = node.bid.value;
 						bestBid.entity = node.entity;
@@ -113,7 +147,7 @@ class TaskSystem extends System {
 				var position:Position = bestBid.entity.get(Position);
 				task.estimatedTime = worker.estimateTaskLength(task, position.point);
 				bestBid.entity.add(task);
-				TaskService.instance.queue.remove(task);
+				TaskService.instance.removeTask(task);
 			}
 		}
 	}

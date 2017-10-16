@@ -79,12 +79,12 @@ class TileMapService {
             // Draw a diamond shaped tile pattern with walls at the edge
             var startArea = [
                 0,  0,  0,  2,  2, 0,  0,  0,
-                0,  0,  2,  1,  1, 2,  0,  0,
-                0,  2,  1,  1,  1, 1,  2,  0,
-                2,  1,  1,  1,  1, 1,  1,  2,
-                2,  1,  1,  1,  1, 1,  1,  2,
-                0,  2,  1,  1,  1, 1,  2,  0,
-                0,  0,  2,  1,  1, 2,  0,  0,
+                0,  0,  2,  1,  7, 2,  0,  0,
+                0,  2,  1,  1,  1, 2,  2,  0,
+                2,  1,  1,  1,  2, 2,  7,  2,
+                2,  7,  1,  2,  1, 7,  7,  2,
+                0,  2,  2,  1,  1, 2,  2,  0,
+                0,  0,  2,  1,  7, 2,  0,  0,
                 0,  0,  0,  2,  2, 0,  0,  0
             ];
 
@@ -107,6 +107,16 @@ class TileMapService {
                     addBackdropTile(new Point(x, y), tile);
                     continue;
                 }
+
+                if(id == this.enumMap.get(TileType.ORE)) {
+                    // Create static tile
+                    var tile = new Tile(this.enumMap.get(TileType.FLOOR), x * GameConfig.tileSize, y * GameConfig.tileSize);
+                    addBackdropTile(new Point(x, y), tile);
+
+                    
+                    var ore:Entity = EntityFactory.instance.createOre(new Point(x, y), id);
+                    continue;
+                }
                 
                 EntityFactory.instance.createBlock(new Point(x, y), id, Util.anyOneOf([2,2,3,3,4,4,4,5,6,7,8,9]));
                 
@@ -116,8 +126,8 @@ class TileMapService {
             var id = this.enumMap.get(TileType.BASE);
             EntityFactory.instance.createBuilding(new Point(centerX, centerY), id, Buildings.BASE);
             EntityFactory.instance.createWorker("Alice");
-            EntityFactory.instance.createWorker("Bob");
-            EntityFactory.instance.createWorker("Carol");
+            //EntityFactory.instance.createWorker("Bob");
+            //EntityFactory.instance.createWorker("Carol");
             //EntityFactory.instance.createWorker("Doug");
             //EntityFactory.instance.createWorker("Evelyn");
             //EntityFactory.instance.createWorker("Fred");
@@ -147,6 +157,7 @@ class TileMapService {
             neighbour.add(cell.x, cell.y);
 
             var neighbourTile = positionMap.get(neighbour);
+            
             if (neighbourTile == null) {
                 var id = this.enumMap.get(TileType.WALL);
     
@@ -154,6 +165,17 @@ class TileMapService {
                 TaskService.instance.addTask(new Task(Skills.MINE, block));
             }
 
+        }
+
+        var corners = [new Point(1, 1), new Point(1, -1), new Point(-1, 1), new Point(-1, -1)];
+        for(corner in corners) {
+            corner.add(cell.x, cell.y);
+
+            var cornerTile = positionMap.get(corner);
+            if (cornerTile == null) {
+                var id = this.enumMap.get(TileType.WALL);
+                EntityFactory.instance.createBlock(new Point(corner.x, corner.y), id, Util.anyOneOf([2,2,3,3,4,4,4,5,6,7,8,9]));
+            }
         }
 
         var floorTile = new Tile(this.enumMap.get(TileType.FLOOR), tile.x  , tile.y );

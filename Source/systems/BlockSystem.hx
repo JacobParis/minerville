@@ -22,6 +22,7 @@ import components.tocks.BlockTock;
 import services.EntityFactory;
 import services.GameDataService;
 import services.TaskService;
+import services.TechService;
 import services.TileMapService;
 
 import nodes.BlockNode;
@@ -55,7 +56,7 @@ class BlockSystem extends System {
 			if(node.entity.has(ClickedEh)) {
 				node.entity.remove(ClickedEh);
 
-				TaskService.instance.addTask(new Task(Skills.MINE, node.entity));
+				TaskService.instance.addTask(new Task(Skills.MINE, node.entity), true);
 				/* Direct assigment
 				this.engine.getEntityByName("James")
 				.add(new Walking(node.position.x, node.position.y, node.entity)); */	
@@ -74,7 +75,7 @@ class BlockSystem extends System {
 			if(node.entity.has(ClickedEh)) {
 				node.entity.remove(ClickedEh);
 
-				TaskService.instance.addTask(new Task(Skills.CARRY, node.entity));
+				TaskService.instance.addTask(new Task(Skills.CARRY, node.entity), true);
 			}
 		}
 	}
@@ -82,8 +83,10 @@ class BlockSystem extends System {
 	public function tock(_) {
 		for (node in engine.getNodeList(BlockNode)) {
 			// Randomly ask to be mined
-			if(Util.rnd(0, 100) == 0) {
-				TaskService.instance.addTask(new Task(Skills.MINE, node.entity));
+			if(TechService.instance.isTechUnlocked("search-dirt", Categories.MINE)) {
+				if(Util.rnd(0, 100) == 0) {
+					TaskService.instance.addTask(new Task(Skills.MINE, node.entity));
+				}
 			}
 		}
 
@@ -93,8 +96,10 @@ class BlockSystem extends System {
 				continue;
 			}
 			// Randomly ask to be collected
-			if(Util.rnd(0, 3) == 0) {
-				TaskService.instance.addTask(new Task(Skills.CARRY, node.entity));
+			if(TechService.instance.isTechUnlocked("search-ore", Categories.CARRY)) {
+				if(Util.rnd(0, 3) == 0) {
+					TaskService.instance.addTask(new Task(Skills.CARRY, node.entity));
+				}
 			}
 		}
 	}

@@ -18,6 +18,7 @@ import components.GameState;
 import components.Health;
 import components.Ore;
 import components.Position;
+import components.Stationary;
 import components.Task;
 import components.TileImage;
 import components.Worker;
@@ -29,6 +30,7 @@ import components.markers.ClickedEh;
 import nodes.AINode;
 import nodes.BlockNode;
 import nodes.TileNode;
+import nodes.StationaryObjectNode;
 
 import graphics.AsciiView;
 
@@ -113,12 +115,29 @@ class EntityFactory {
     }
 
      /**
+     *  Tests if a stationary object is present in a specific cell
+     *  @param x - X Cell
+     *  @param y - Y Cell
+     *  @return Null<Entity>
+     */
+    public function stationaryAt(x:Float, y:Float):Null<Entity> {
+        var nodes:NodeList<StationaryObjectNode> = engine.getNodeList(StationaryObjectNode);
+        for(node in nodes) {
+            if(node.position.x == x
+            && node.position.y == y) {
+                return node.entity;
+            }
+        }
+        return null;
+    }
+
+    /**
      *  Tests if a worker is present in a specific cell
      *  @param x - X Cell
      *  @param y - Y Cell
      *  @return Null<Entity>
      */
-    public function playerAt(x:Float, y:Float):Null<Entity> {
+    public function workerAt(x:Float, y:Float):Null<Entity> {
         var nodes:NodeList<AINode> = engine.getNodeList(AINode);
         for(node in nodes) {
             if(node.position.x == x
@@ -164,6 +183,7 @@ class EntityFactory {
         var building:Entity = new Entity(name.getName())
         .add(new Position(cell.x, cell.y))
         .add(new TileImage(tile, true))
+        .add(new Stationary())
         .add(new Building());
 
         this.engine.addEntity(building);
@@ -174,6 +194,7 @@ class EntityFactory {
         var tile:Tile = new Tile(id);
         var block:Entity = new Entity()
         .add(new Position(cell.x, cell.y))
+        .add(new Stationary())
         .add(new TileImage(tile))
         .add(new Health(health));
 
@@ -198,6 +219,7 @@ class EntityFactory {
         var tile:Tile = new Tile(id);
         var ore:Entity = new Entity()
         .add(new Position(cell.x, cell.y))
+        .add(new Stationary())
         .add(new TileImage(tile, true))
         .add(new Ore(id));
 
