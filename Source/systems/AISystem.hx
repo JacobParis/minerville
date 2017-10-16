@@ -73,12 +73,16 @@ class AISystem extends System {
 		var horizontalMove:Null<Point> = null;
 		if(!surroundings.getr(deltaX, 0)) {
 			horizontalMove = new Point(position.x + deltaX, position.y);
+		} else {
+			EntityFactory.instance.addStimulus(new Point(position.x + deltaX, position.y), 1.1);
 		}
 
 		var deltaY = Util.sign(destination.y - position.y);
 		var verticalMove:Null<Point> = null;
 		if(!surroundings.getr(0, deltaY)) {
 			verticalMove = new Point(position.x, position.y + deltaY);
+		} else {
+			EntityFactory.instance.addStimulus(new Point(position.x, position.y + deltaY), 1.1);
 		}
 		
 		if(horizontalMove != null
@@ -95,11 +99,13 @@ class AISystem extends System {
 		if(verticalMove != null) return verticalMove;
 
 		trace("Cannot move from " + position + " toward " + destination);
+
+
 		return position;
 	}
 
 	private function generatePath(position:Point, destination:Point, surroundings:RelativeArray2D<Bool>):Null<Path> {
-		trace(surroundings);
+		//trace(surroundings);
 		var distance = Util.fint(surroundings.width / 2.0);
 		// We know moving in a straight path will not work, so try strafing
 		var deltaX = Util.diff(destination.x, position.x);
@@ -165,8 +171,8 @@ class AISystem extends System {
 	}
 	public function tock(time:Float):Void {
 		for (node in engine.getNodeList(TaskWorkerNode)) {
-			trace(node.entity.name + " is working...");
-			Main.log(node.task);
+			//trace(node.entity.name + " is working...");
+			//Main.log(node.task);
 			// Drop task if it takes longer than expected
 			if(node.task.timeTaken++ > node.task.estimatedTime) {
 				trace(node.entity.name + " has dropped task " + node.task.action.getName());
@@ -202,7 +208,7 @@ class AISystem extends System {
 					var path = node.entity.get(Path);
 					var point = path.next();
 					if(point != null) {
-						trace("		is moving along her path");
+						//trace("		is moving along her path");
 						target = position.point.clone().add(point.x, point.y);
 					} else {
 						node.entity.remove(Path);
@@ -213,7 +219,7 @@ class AISystem extends System {
 				
 				if(target.x == position.point.x
 				&& target.y == position.point.y) {
-					trace("		did not move this time.");
+					//trace("		did not move this time.");
 					// We didn't move, try again
 					var path = generatePath(position.point, destination, area);
 					if(path != null) {
@@ -297,6 +303,7 @@ class AISystem extends System {
 			returnTask.estimatedTime = entity.get(Worker).estimateTaskLength(returnTask, entity.get(Position).point);
 			entity.add(returnTask);
 		}
+		trace(task.target.name);
 		EntityFactory.instance.destroyEntity(task.target);
 	}
 

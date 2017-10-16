@@ -19,6 +19,7 @@ import components.Health;
 import components.Ore;
 import components.Position;
 import components.Stationary;
+import components.Stimulus;
 import components.Task;
 import components.TileImage;
 import components.Worker;
@@ -60,6 +61,7 @@ class EntityFactory {
     }
 
     public function destroyEntity(entity:Entity):Void {
+        trace(entity.name);
         this.engine.removeEntity(entity);
     }
 
@@ -68,6 +70,7 @@ class EntityFactory {
         if(entity == null) return;
 
         trace("Add clickmarker");
+        Main.log(entity);
         entity.add(new ClickedEh());
     }
 
@@ -142,7 +145,7 @@ class EntityFactory {
         for(node in nodes) {
             if(node.position.x == x
             && node.position.y == y) {
-                return node.entity;
+                if(!node.entity.has(Stationary)) return node.entity;
             }
         }
         return null;
@@ -168,6 +171,15 @@ class EntityFactory {
 			entity1.add(entity2.remove(componentClass));
 		}
 	}
+
+    public function addStimulus(position:Point, amount:Float = 0.1) {
+        var obstruction = stationaryAt(position.x, position.y);
+        if(obstruction != null) {
+            if(obstruction.has(Stimulus)) {
+                obstruction.get(Stimulus).increaseStrength(amount);
+            } else obstruction.add(new Stimulus(amount));
+        }
+    }
 
     /* Create Game Entity */
     public function createGame():Entity {
