@@ -14,6 +14,7 @@ import services.CameraService;
 import services.EntityFactory;
 import services.EventService;
 import services.TaskService;
+import services.TechService;
 import services.TileMapService;
 import services.UIService;
 
@@ -51,6 +52,8 @@ class Game {
             MouseEvent.MOUSE_WHEEL
         ]);
         input.addListeners(camera);
+        
+        var tech = TechService.instance.initialize();
         
         var tockSystem = new TockSystem();
         engine.addSystem(tockSystem, 2);
