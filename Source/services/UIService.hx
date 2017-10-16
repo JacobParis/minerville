@@ -14,6 +14,8 @@ import openfl.text.TextField;
 import openfl.text.TextFormat;
 import openfl.geom.Rectangle;
 
+import services.TaskService;
+
 import util.Util;
 
 /**
@@ -83,9 +85,7 @@ class UIService {
                     }
                 }
                 if(this.container.stage.mouseX > 240) {
-                    if(data.gold > 100) {
-                        data.buyMiner();
-                    }
+                    Main.log(TaskService.instance.getAllTasks());
                 }
             });
         });
