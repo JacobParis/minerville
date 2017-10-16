@@ -28,6 +28,20 @@ class Point
 		return this;
 	}
 
+	public function addPoint(point:Point):Point {
+		this.x += point.x;
+		this.y += point.y;
+
+		return this;
+	}
+
+	public function invert():Point {
+		this.x = -this.x;
+		this.y = -this.y;
+
+		return this;
+	}
+
 	public function multiply(x:Float, ?y:Float):Point {
 		this.x = Util.fint(this.x * x);
 				
@@ -60,6 +74,9 @@ class Point
 		return this;
 	}
 
+	public function clone():Point {
+		return new Point(this.x, this.y);
+	}
 	public function hashCode():Int {
 		return this.x * 1024 + this.y;
 	}

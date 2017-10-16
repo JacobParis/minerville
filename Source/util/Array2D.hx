@@ -142,6 +142,9 @@ class Array2D<T>
 		return neighbors;
 	}
 
+	public function getCenterIndex():Int {
+		return Util.fint(this.width * this.height / 2);
+	}
 	public function hasNext():Bool {
 		return this.iterator < this.array.length;
 	}
@@ -152,5 +155,25 @@ class Array2D<T>
 
 	public function resetCursor() {
 		this.iterator = 0;
+	}
+
+	public function toString():String {
+		var array:String = "width: " + this.width + ", height: " + this.height + "\n";
+		for(y in 0...this.height) {
+			var row:String = "";
+			for(x in 0...this.width) {
+				var cell = this.get(x, y);
+				if(cell == null) {
+					row += "\u25A8";
+				} else if(cast cell) {
+					row += "\u2B1B";
+				} else {
+					row += "\u2B1C";
+				}
+			}
+			array += row + "\n";
+		}
+		return array;
+
 	}
 }
