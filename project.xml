@@ -10,6 +10,7 @@
 	<source path="Source" />
 	<haxelib name="openfl" />
 	<haxeflag name="--connect" value="6000" />
+	<haxeflag name="-debug" />
 	<assets path="Assets" rename="assets" />
 	
 </project>

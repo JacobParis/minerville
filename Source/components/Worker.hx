@@ -62,7 +62,7 @@ class Worker {
 
     public function tweakEstimations(amount:Float) {
         this.estimationTweak += amount / Util.rnd(5, 10);
-        trace(this.estimationTweak);
+        //trace(this.estimationTweak);
     }
     /**
      *  Train a skill. Should be called every time a task is completed

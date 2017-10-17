@@ -78,7 +78,7 @@ class Game {
         tickProvider.add(camera.update);
         tickProvider.start();
 
-        var tockProvider:ITickProvider = new FixedTickProvider(gameLayer, 0.5);
+        var tockProvider:ITickProvider = new FixedTickProvider(gameLayer, 0.1);
         tockProvider.add(tockSystem.tock);
         tockProvider.add(blockSystem.tock);
         tockProvider.add(taskSystem.tock);
