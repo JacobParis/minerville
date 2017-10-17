@@ -39,112 +39,82 @@ class TaskSystem extends System {
 	}
 	
 	override public function update(time:Float):Void {
-		
-		
-		/* All active tasks will be in this queue until completed.
-		When they are accepted by a worker, they are moved to the 
-		bottom of the queue and are not removed. */
 		currentTime += time;
-
-		
-
-		
 	}
 	
 	
-	public function tock(time:Float):Void {
-		if(service.hasTasks()) {
-			// Run through the list of tasks
-			for(task in service.getAllTasks()) {
-				if(task.timePosted == 0) task.timePosted = currentTime;
-				for (node in this.nodes) {
-					
-					
-					// Remove workers that have tasks
-					if(node.entity.has(Task)) {
-						//trace("		has a task");
-						continue;
-					}
-
-					if(node.entity.has(Mining)) {
-						//trace("		is busy mining");
-						continue;
-					}
-					
-					//trace("		has no task and is not mining");
-					if(node.entity.has(TaskBid)) {
-						var bid:TaskBid = node.entity.get(TaskBid);
-						if(bid.task == task) continue;
-						if(bid.task.priority >= task.priority) {
-							//trace("		has a higher priority bid.");
-							continue;
-						}
-					}
-
-					var suitability:Float;
-					var threshold:Float;
-					switch(task.action) {
-						case MINE: threshold = node.worker.mineThreshold();
-						case WALK: threshold = node.worker.carryThreshold();
-						case CARRY: threshold = node.worker.carryThreshold();
-						case ATTACK: threshold = node.worker.attackThreshold();
-					}
-					trace(node.entity.name);
-					
-					var base = (1.0 / task.difficulty) - threshold;
-					suitability = base + (currentTime - task.timePosted) / 10000.0;
-					if(Util.chance(suitability) || task.priority > 1) { // Currently returning values around 0.9
-						trace("		and made a bid!");
-							node.entity.remove(TaskBid);
-						
-						node.entity.add(new TaskBid(task, suitability));
-					} else {
-						trace("		and chose not to make a bid.");
-					}
-				}
-			}
-		}
-		/**
-			 * The bid system chooses the best worker for the job out of
-			 *  all the workers that have applied for it. 
-			 */
-
-		
+	public function tock(_):Void {
+		if(!service.hasTasks()) return;
 		var queue = service.getAllTasks();
-		for(task in queue) {
-			// If there are no longer available workers, quit
-			if(engine.getNodeList(BidNode).empty) {
-				//trace("There are no available workers.");
-				return;
-			}
 
+		// Run through the list of tasks
+		for(task in queue) {
+			
+			// Clean up bad tasks
 			if(task.target == null) {
 				trace("Task target is null");
 				TaskService.instance.removeTask(task);
 			}
 
-			var bestBid = {
-				value: 0.0,
-				entity: new Entity()
-			};
+			if(task.timePosted == 0) task.timePosted = currentTime;
+			for (node in engine.getNodeList(AINode)) {
+
+				// Remove workers that have tasks
+				if(node.entity.has(Task)) continue;
+				if(node.entity.has(Mining)) continue;
+			
+				//trace("		has no task and is not mining");
+				if(node.entity.has(TaskBid)) {
+					var bid:TaskBid = node.entity.get(TaskBid);
+					if(bid.task == task) continue;
+					if(bid.task.priority >= task.priority) continue;
+				}
+				
+				var suitability:Float;
+				var threshold:Float;
+				switch(task.action) {
+					case MINE: threshold = node.worker.mineThreshold();
+					case WALK: threshold = node.worker.carryThreshold();
+					case CARRY: threshold = node.worker.carryThreshold();
+					case ATTACK: threshold = node.worker.attackThreshold();
+				}
+				//trace(node.entity.name);
+				
+				var base = (1.0 / task.difficulty) - threshold;
+				suitability = base + (currentTime - task.timePosted) / 10000.0;
+				if(Util.chance(suitability) || task.priority > 1) { // Currently returning values around 0.9
+					//trace("		and made a bid!");
+						node.entity.remove(TaskBid);
+					
+					node.entity.add(new TaskBid(task, suitability));
+				} else {
+					//trace("		and chose not to make a bid.");
+				}
+			}
+
+			// If there are no longer available workers, quit
+			if(engine.getNodeList(BidNode).empty) return;
+
+			var winningBid = 0.0;
+			var winningEntity = null;
 
 			for (node in engine.getNodeList(BidNode)) {
 				if(task.target == node.bid.task.target
 				&& task.action == node.bid.task.action) {
-					if(node.bid.value > bestBid.value) {
-						bestBid.value = node.bid.value;
-						bestBid.entity = node.entity;
+					if(node.bid.value > winningBid) {
+						winningBid = node.bid.value;
+						winningEntity = node.entity;
 					}
 
-					bestBid.entity.remove(TaskBid);
+					winningEntity.remove(TaskBid);
 				}
 			}
 
-			if(bestBid.value > 0) {
-				var worker:Worker = bestBid.entity.get(Worker);
-				var position:Position = bestBid.entity.get(Position);
+			if(winningBid > 0) {
+				var worker:Worker = winningEntity.get(Worker);
+				var position:Position = winningEntity.get(Position);
 				task.estimatedTime = worker.estimateTaskLength(task, position.point);
-				bestBid.entity.add(task);
+				winningEntity.add(task);
 				TaskService.instance.removeTask(task);
 			}
 		}
