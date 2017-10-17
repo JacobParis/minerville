@@ -8,16 +8,19 @@ import ash.core.NodeList;
 import ash.core.System;
 
 import nodes.RenderNode;
+import nodes.MarkerNode;
+
+import components.Marker;
 
 import components.Display;
-import components.Position;
+import components.TilePosition;
 
 
 class RenderSystem extends System
 {
     public var container:DisplayObjectContainer;
 
-    private var nodes:NodeList<RenderNode>;
+    private var nodes:NodeList<MarkerNode>;
 
     public function new(container:DisplayObjectContainer) {
         super();
@@ -25,7 +28,7 @@ class RenderSystem extends System
     }
 
     override public function addToEngine(engine:Engine):Void {
-        this.nodes = engine.getNodeList(RenderNode);
+        this.nodes = engine.getNodeList(MarkerNode);
         
         for (node in nodes) {
             addToDisplay(node);
@@ -35,21 +38,21 @@ class RenderSystem extends System
         this.nodes.nodeRemoved.add(removeFromDisplay);
     }
 
-    private function addToDisplay(node:RenderNode):Void {
-        container.addChild(node.displayObject);
+    private function addToDisplay(node:MarkerNode):Void {
+        Main.ui.addChild(node.marker.label);
     }
 
-    private function removeFromDisplay(node:RenderNode):Void {
-        container.removeChild(node.displayObject);
+    private function removeFromDisplay(node:MarkerNode):Void {
+        Main.ui.removeChild(node.marker.label);
     }
 
     override public function update(time:Float):Void {
         for (node in this.nodes) {
-            var displayObject:DisplayObject = node.displayObject;
-            var position:Position = node.position;
+            var marker:Marker = node.marker;
+            var position:TilePosition = node.position;
 
-            displayObject.x = position.position.x;
-            displayObject.y = position.position.y;
+            marker.label.x = position.x;
+            marker.label.y = position.y;
         }
     }
 

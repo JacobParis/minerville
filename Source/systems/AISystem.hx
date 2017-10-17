@@ -7,7 +7,7 @@ import ash.core.Entity;
 import ash.core.NodeList;
 import ash.core.System;
 
-import components.Position;
+import components.TilePosition;
 import components.Health;
 import components.Ore;
 import components.Path;
@@ -182,7 +182,7 @@ class AISystem extends System {
 		//node.worker.detrain(node.task.action);
 		if(entity.has(Ore)) {
 			var ore = entity.remove(Ore);
-			if(entity.has(Position)) {
+			if(entity.has(TilePosition)) {
 				// TODO check for surroundings
 				//var adjacentPoint = entity.get(Position).point.clone().add(Util.anyOneOf([-1, 0, 1]), Util.anyOneOf([-1, 1]));
 				//factory.createOre(adjacentPoint, ore.id);
@@ -199,7 +199,7 @@ class AISystem extends System {
 			}
 
 			var destination:Point = node.task.location();
-			var position:Position = node.position;
+			var position:TilePosition = node.position;
 			// Travel to task
 			if(Point.distance(position.point, destination) > 1) {
 				// Remove stationary component if present
@@ -239,7 +239,7 @@ class AISystem extends System {
 				// If the worker collides with another worker, swap their positions
 				var collidee = factory.workerAt(target.x, target.y);
 				if(collidee != null) {
-					collidee.get(Position).point = position.point;
+					collidee.get(TilePosition).point = position.point;
 					node.entity.add(new Stationary());
 				}
 
@@ -284,14 +284,14 @@ class AISystem extends System {
 
 	
 	private function mineBlock(entity:Entity,task:Task) {
-		trace("mineBlock");
+		//trace("mineBlock");
 		entity.remove(Task);
 		entity.get(Worker).train(Skills.MINE, entity.name);
 		entity.add(new Mining(task.target));
 		entity.add(new Stationary());
 	}
 	private function takeOreToBase(entity:Entity,task:Task) {
-		trace("takeOreToBase");
+		//trace("takeOreToBase");
 		entity.remove(Task);
 
 		if(task.target.has(Ore)) {
@@ -300,7 +300,7 @@ class AISystem extends System {
 			entity.add(ore);
 
 			var returnTask:Task = factory.getWalkingToBase();
-			returnTask.estimatedTime = entity.get(Worker).estimateTaskLength(returnTask, entity.get(Position).point);
+			returnTask.estimatedTime = entity.get(Worker).estimateTaskLength(returnTask, entity.get(TilePosition).point);
 			entity.add(returnTask);
 		}
 
@@ -308,7 +308,7 @@ class AISystem extends System {
 	}
 
 	private function completeWalk(entity:Entity, task:Task) {
-		trace("completeWalk");
+		//trace("completeWalk");
 		entity.remove(Task);
 		if(task.target.name == Buildings.BASE.getName()) {
 			if(entity.has(Ore)) {

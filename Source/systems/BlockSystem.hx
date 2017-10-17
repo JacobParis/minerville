@@ -66,13 +66,6 @@ class BlockSystem extends System {
 			}
 
 			node.tile.tile.id = 2;
-			
-			if(node.health.value == 0) {
-				trace(node.entity.name);
-				TileMapService.instance.destroyBlock(node.entity);
-			}
-
-			
 		}
 
 		for (node in engine.getNodeList(OreNode)) {
@@ -100,6 +93,12 @@ class BlockSystem extends System {
 				} else if(Util.chance(0.5)) {
 					TaskService.instance.addTask(new Task(Skills.MINE, node.entity));
 				}
+			}
+
+			// Kill if dead
+			if(node.health.value <= 0) {
+				trace(node.entity.name);
+				TileMapService.instance.destroyBlock(node.entity);
 			}
 		}
 

@@ -7,7 +7,7 @@ import ash.core.System;
 
 import components.ai.Mining;
 
-import components.Position;
+import components.TilePosition;
 import components.Task;
 import components.TaskBid;
 import components.Worker;
@@ -112,7 +112,7 @@ class TaskSystem extends System {
 
 			if(winningBid > 0) {
 				var worker:Worker = winningEntity.get(Worker);
-				var position:Position = winningEntity.get(Position);
+				var position:TilePosition = winningEntity.get(TilePosition);
 				task.estimatedTime = worker.estimateTaskLength(task, position.point);
 				winningEntity.add(task);
 				TaskService.instance.removeTask(task);

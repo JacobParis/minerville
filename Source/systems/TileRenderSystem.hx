@@ -8,7 +8,6 @@ import ash.core.Engine;
 import ash.core.NodeList;
 import ash.core.System;
 
-import components.Position;
 import components.TileImage;
 
 import nodes.TileNode;

@@ -26,7 +26,7 @@ class Task {
     }
 
     public inline function location():Point {
-        return target.get(Position).point;
+        return target.get(TilePosition).point;
     }
 
     public function toString() {

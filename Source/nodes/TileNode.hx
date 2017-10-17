@@ -2,10 +2,10 @@ package nodes;
 
 import ash.core.Node;
 
-import components.Position;
+import components.TilePosition;
 import components.TileImage;
 
 class TileNode extends Node<TileNode> {
-    public var position:Position;
+    public var position:TilePosition;
     public var tile:TileImage;
 }

@@ -3,10 +3,10 @@ package nodes;
 import ash.core.Node;
 
 // import components
-import components.Position;
+import components.TilePosition;
 import components.Stationary;
 
 class StationaryObjectNode extends Node<StationaryObjectNode> {
-    public var position:Position;
+    public var position:TilePosition;
     public var stationary:Stationary;
 }

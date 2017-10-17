@@ -16,12 +16,14 @@ import interfaces.InputListener;
 import components.Building;
 import components.GameState;
 import components.Health;
+import components.Marker;
 import components.Ore;
 import components.Position;
 import components.Stationary;
 import components.Stimulus;
 import components.Task;
 import components.TileImage;
+import components.TilePosition;
 import components.Worker;
 
 import components.ai.Walking;
@@ -193,7 +195,7 @@ class EntityFactory {
     public function createBuilding(cell:Point, id:Int, name:Buildings):Entity {
         var tile:Tile = new Tile(id);
         var building:Entity = new Entity(name.getName())
-        .add(new Position(cell.x, cell.y))
+        .add(new TilePosition(cell.x, cell.y))
         .add(new TileImage(tile, true))
         .add(new Stationary())
         .add(new Building());
@@ -205,7 +207,7 @@ class EntityFactory {
     public function createBlock(cell:Point, id:Int, health:Int):Entity {
         var tile:Tile = new Tile(id);
         var block:Entity = new Entity()
-        .add(new Position(cell.x, cell.y))
+        .add(new TilePosition(cell.x, cell.y))
         .add(new Stationary())
         .add(new TileImage(tile))
         .add(new Health(health));
@@ -216,11 +218,12 @@ class EntityFactory {
 
     public function createWorker(name:String):Entity {
         var base:Entity = this.engine.getEntityByName(Buildings.BASE.getName());
-        var position:Position = base.get(Position);
+        var position:TilePosition = base.get(TilePosition);
         var tile:Tile = new Tile(5);
         var worker:Entity = new Entity(name)
-        .add(new Position(position.x + Util.anyOneOf([-1, 1]), position.y + Util.anyOneOf([-1, 1])))
+        .add(new TilePosition(position.x + Util.anyOneOf([-1, 1]), position.y + Util.anyOneOf([-1, 1])))
         .add(new TileImage(tile, true))
+        .add(new Marker(name))
         .add(new Worker());
         
         this.engine.addEntity(worker);
@@ -230,7 +233,7 @@ class EntityFactory {
     public function createOre(cell:Point, id:Int):Entity {
         var tile:Tile = new Tile(id);
         var ore:Entity = new Entity()
-        .add(new Position(cell.x, cell.y))
+        .add(new TilePosition(cell.x, cell.y))
         .add(new Stationary())
         .add(new TileImage(tile, true))
         .add(new Ore(id));
