@@ -32,4 +32,22 @@ class RelativeArray2D<T> extends Array2D<T> {
         var point = super.fromIndex(i);
         return point.add(-offset.x, -offset.y);
     }
+
+    @:expose("array2D") @:keep
+	public static function fromString(s:String):RelativeArray2D<Bool> {
+		var array = new RelativeArray2D<Bool>(9, 9, new Point(4, 4), false);
+
+		for(i in 0...s.length) {
+			var x = i % 9;
+			var y = Util.fint(i / 9);
+
+			switch(s.charAt(i)) {
+				case "\u2B1B": array.set(x, y, true);
+				case "\u2B1C": array.set(x, y, false);
+				default: array.set(x, y, null);
+			}
+		}
+
+		return array;
+	}
 }

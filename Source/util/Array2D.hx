@@ -164,11 +164,11 @@ class Array2D<T>
 			for(x in 0...this.width) {
 				var cell = this.get(x, y);
 				if(cell == null) {
-					row += "\u25C6";
+					row += "▣";
 				} else if(cast cell) {
-					row += "\u2B1B";
+					row += "▩";
 				} else {
-					row += "\u2B1C";
+					row += "▢";
 				}
 			}
 			array += row + "\n";
@@ -176,4 +176,5 @@ class Array2D<T>
 		return array;
 
 	}
+	
 }

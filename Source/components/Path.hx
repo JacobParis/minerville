@@ -6,9 +6,11 @@ import util.ds.ArrayedStack;
 class Path {
 
     public var points:ArrayedStack<Point>;
+    public var origin:Point;
 
-    public function new() {
+    public function new(origin:Point) {
         this.points = new ArrayedStack<Point>();
+        this.origin = origin;
     }
 
     public function next():Null<Point> {

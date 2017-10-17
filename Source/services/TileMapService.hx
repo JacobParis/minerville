@@ -8,27 +8,22 @@ import openfl.Assets;
 import openfl.display.BitmapData;
 import openfl.display.Tile;
 import openfl.display.Tilemap;
-import openfl.display.TileArray;
 
 import openfl.display.Tileset;
 import openfl.display.DisplayObjectContainer;
 
-import openfl.events.MouseEvent;
 
 import openfl.geom.Rectangle;
-import openfl.geom.Matrix;
 
-import ash.core.Engine;
 import ash.core.Entity;
 
-import components.Health;
 import components.Task;
 import components.TileImage;
 
 import services.EntityFactory;
 import services.TaskService;
 
-import util.ds.ArrayedQueue;
+import util.RelativeArray2D;
 import util.Point;
 
 import util.Util;
@@ -128,8 +123,8 @@ class TileMapService {
             EntityFactory.instance.createWorker("Alice");
             EntityFactory.instance.createWorker("Bob");
             EntityFactory.instance.createWorker("Carol");
-            EntityFactory.instance.createWorker("Doug");
-            EntityFactory.instance.createWorker("Evelyn");
+            //EntityFactory.instance.createWorker("Doug");
+            //EntityFactory.instance.createWorker("Evelyn");
             //EntityFactory.instance.createWorker("Fred");
             //EntityFactory.instance.createWorker("Georgia");
 
@@ -162,7 +157,7 @@ class TileMapService {
                 var id = this.enumMap.get(TileType.WALL);
     
                 var block = EntityFactory.instance.createBlock(new Point(neighbour.x, neighbour.y), id, Util.anyOneOf([2,2,3,3,4,4,4,5,6,7,8,9]));
-                TaskService.instance.addTask(new Task(Skills.MINE, block));
+                TaskService.instance.addTask(new Task(Skills.MINE, block), 1.5);
             }
 
         }
@@ -264,6 +259,19 @@ class TileMapService {
         actives.removeTile(tile);
         backdrops.removeTile(tile);
     }
+
+    public function lookAround(position:Point, distance:Int):RelativeArray2D<Null<Bool>> {
+		var size = distance * 2 + 1;
+		var surroundings:RelativeArray2D<Null<Bool>> = new RelativeArray2D<Null<Bool>>(size, size, new Point(distance,distance), false);
+		for(i in 0...surroundings.size) {
+			var cell = surroundings.fromIndex(i);
+			var block = EntityFactory.instance.stationaryAt(position.x + cell.x - distance, position.y + cell.y - distance) != null;
+			//var worker = EntityFactory.instance.stationaryAt(position.x + cell.x - 2, position.y + cell.y - 2) != null;
+			surroundings.setIndex(i, block);
+		}
+		//trace(surroundings);
+		return surroundings;
+	}
 
     
 }

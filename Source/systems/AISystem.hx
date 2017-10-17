@@ -37,6 +37,8 @@ import util.Util;
 class AISystem extends System {
     private var nodes:NodeList<AINode>;
 	private var engine:Engine;
+	private var map:TileMapService;
+	private var factory:EntityFactory;
 
     public function new() {
         super();
@@ -45,48 +47,29 @@ class AISystem extends System {
 	override public function addToEngine(engine:Engine):Void {
 		this.nodes = engine.getNodeList(AINode);
 		this.engine = engine;
-	}
-	
-	override public function update(time:Float):Void {
-		for (node in this.nodes) {
-			//var component:Component = node.component;
-			
-		}
+		this.map = TileMapService.instance;
+		this.factory = EntityFactory.instance;
+
 	}
 
-	private function lookAround(position:Point, distance:Int):RelativeArray2D<Null<Bool>> {
-		var size = distance * 2 + 1;
-		var surroundings:RelativeArray2D<Null<Bool>> = new RelativeArray2D<Null<Bool>>(size, size, new Point(distance,distance), false);
-		for(i in 0...surroundings.size) {
-			var cell = surroundings.fromIndex(i);
-			var block = EntityFactory.instance.stationaryAt(position.x + cell.x - distance, position.y + cell.y - distance) != null;
-			//var worker = EntityFactory.instance.stationaryAt(position.x + cell.x - 2, position.y + cell.y - 2) != null;
-			surroundings.setIndex(i, block);
-		}
-		//trace(surroundings);
-		return surroundings;
-	}
 	private function movePosition(position:Point, destination:Point, surroundings:RelativeArray2D<Bool>):Point {
-		// If we need to move more horizontally, start there
-		// Is there an obstacle where we're trying to go?
 		var deltaX = Util.sign(destination.x - position.x);
-		var horizontalMove:Null<Point> = null;
-		if(!surroundings.getr(deltaX, 0)) {
-			horizontalMove = new Point(position.x + deltaX, position.y);
-		} else {
-			EntityFactory.instance.addStimulus(new Point(position.x + deltaX, position.y), 1.1);
+		var deltaY = Util.sign(destination.y - position.y);
+		
+		var horizontalMove:Null<Point> = new Point(position.x + deltaX, position.y);
+		var verticalMove:Null<Point> = new Point(position.x, position.y + deltaY);
+		
+		if(surroundings.getr(deltaX, 0)) {
+			factory.addStimulus(horizontalMove, 1.1);
+			horizontalMove = null;
 		}
 
-		var deltaY = Util.sign(destination.y - position.y);
-		var verticalMove:Null<Point> = null;
-		if(!surroundings.getr(0, deltaY)) {
-			verticalMove = new Point(position.x, position.y + deltaY);
-		} else {
-			EntityFactory.instance.addStimulus(new Point(position.x, position.y + deltaY), 1.1);
+		if(surroundings.getr(0, deltaY)) {
+			factory.addStimulus(verticalMove, 1.1);
+			verticalMove = null;
 		}
 		
-		if(horizontalMove != null
-		&& verticalMove != null) {
+		if(horizontalMove != null && verticalMove != null) {
 			if(Util.diff(position.x, destination.x) > Util.diff(position.y, destination.y)) {
 				return horizontalMove;
 			} else {
@@ -98,23 +81,20 @@ class AISystem extends System {
 
 		if(verticalMove != null) return verticalMove;
 
-		trace("Cannot move from " + position + " toward " + destination);
-
-
+		//trace("Cannot move from " + position + " toward " + destination);
 		return position;
 	}
 
 	private function generatePath(position:Point, destination:Point, surroundings:RelativeArray2D<Bool>):Null<Path> {
-		//trace(surroundings);
 		var distance = Util.fint(surroundings.width / 2.0);
-		// We know moving in a straight path will not work, so try strafing
+
 		var deltaX = Util.diff(destination.x, position.x);
 		var deltaY = Util.diff(destination.y, position.y);
 
 		var targetX:Null<Int> = null;
 		var targetY:Null<Int> = null;
 
-		if(deltaX < distance && deltaY < distance) {
+		if(distance > deltaX && distance > deltaY) {
 			targetX = destination.x - position.x + distance;
 			targetY = destination.y - position.y + distance;
 		} else if(deltaX > deltaY || ((deltaY == deltaX) && Util.chance(0.5))) {
@@ -123,71 +103,98 @@ class AISystem extends System {
 			targetY = distance * Util.sign(destination.y - position.y) + distance;
 		}
 
-		var path = new Path();
+		var path = new Path(position);
 
-		var closedMap:IntMap<Int> = new IntMap<Int>();
-		var openMap:IntMap<Int> = new IntMap<Int>();
-		openMap.set(surroundings.getCenterIndex(), null);
-		var i = 500;
-		while(openMap.keys().hasNext() && i-- > 0) {
-			var k = openMap.keys();
-			var index = k.next();
-			closedMap.set(index, openMap.get(index));
+		var closedList:List<PathNode> = new List<PathNode>();
+		var openList:List<PathNode> = new List<PathNode>();
 
-			var current:Null<Point> = surroundings.fromIndex(index);
-			if((current.x == targetX || targetX == null)
-			&& ((current.y == targetY) || targetY == null)) {
-				var segment = closedMap.get(index);
-				while (closedMap.get(segment) != null) {
-					surroundings.setIndex(segment, null);
-					var absolutePoint = surroundings.fromIndexRelative(segment);
-					var nextPoint = surroundings.fromIndexRelative(closedMap.get(segment));
-					var relativePoint:Point = absolutePoint.addPoint(nextPoint.invert());
-					path.add(relativePoint);
-					segment = closedMap.get(segment);
+		// Add the worker's location to the list	
+		openList.push({index: surroundings.getCenterIndex(), parent: null});
+
+		while(openList.length > 0) {
+			var current = openList.pop();
+			
+			var point = surroundings.fromIndex(current.index);
+			if((point.x == targetX || targetX == null)
+			&& (point.y == targetY || targetY == null)) {
+				
+				var parent = current;
+				while (parent != null) {
+					surroundings.setIndex(parent.index, null);
+					
+					var absolutePoint = surroundings.fromIndexRelative(parent.index);
+
+					path.add(absolutePoint);
+					parent = parent.parent;
 				}
-				trace(surroundings);
-				trace(path);
+
+				//trace(surroundings);
 				return path;
 			}
 
+			closedList.add(current);
 			
-			var neighbours = surroundings.getNeighboringIndices(index, true);
+			var neighbours = surroundings.getNeighboringIndices(current.index, true);
 			for(i in neighbours) {
-				if(!closedMap.exists(i) && !openMap.exists(i) && !surroundings.getIndex(i)) {
-					openMap.set(i, index);
-				}
+				if((function () {
+					for(closed in closedList) {
+						if(closed.index == i) return true;
+					}
+
+					return false;
+				})()) continue;
+
+				if((function () {
+					for(open in openList) {
+						if(open.index == i) return true;
+					}
+
+					return false;
+				})()) continue;
+				
+				if(surroundings.getIndex(i)) continue;
+
+				openList.add({
+					index: i,
+					parent: current
+				});
 			}
 
-			openMap.remove(index);
 		}
+
 		return null;
-		
 	}
 
 	private function moveOnPath(position:Point, path:Path) {
 		var target = path.next();
 		return target;
 	}
+
+	private function dropTask(entity:Entity, task:Task) {
+		//trace(entity.name + " has dropped task " + task.action.getName());
+		//trace("    Expected duration: " + task.estimatedTime);
+		//trace("    Actual time: " + task.timeTaken);
+
+		// Estimate a little more time next time
+		if(entity.has(Worker)) {
+			entity.get(Worker).tweakEstimations(task.timeTaken - task.estimatedTime);
+		}
+		//node.worker.detrain(node.task.action);
+		if(entity.has(Ore)) {
+			var ore = entity.remove(Ore);
+			if(entity.has(Position)) {
+				// TODO check for surroundings
+				//var adjacentPoint = entity.get(Position).point.clone().add(Util.anyOneOf([-1, 0, 1]), Util.anyOneOf([-1, 1]));
+				//factory.createOre(adjacentPoint, ore.id);
+			}
+		}
+		entity.remove(Task);	
+	}
 	public function tock(time:Float):Void {
 		for (node in engine.getNodeList(TaskWorkerNode)) {
-			//trace(node.entity.name + " is working...");
-			//Main.log(node.task);
 			// Drop task if it takes longer than expected
 			if(node.task.timeTaken++ > node.task.estimatedTime) {
-				trace(node.entity.name + " has dropped task " + node.task.action.getName());
-				trace("    Expected duration: " + node.task.estimatedTime);
-				trace("    Actual time: " + node.task.timeTaken);
-
-				// Estimate a little more time next time
-				//node.worker.tweakEstimations(node.task.timeTaken - node.task.estimatedTime);
-				//node.worker.detrain(node.task.action);
-				if(node.entity.has(Ore)) {
-					var ore = node.entity.remove(Ore);
-					var adjacentPoint = node.position.point.clone().add(Util.anyOneOf([-1, 1]), Util.anyOneOf([-1, 1]));
-					EntityFactory.instance.createOre(adjacentPoint, ore.id);
-				}
-				node.entity.remove(Task);	
+				dropTask(node.entity, node.task);
 				continue;
 			}
 
@@ -196,22 +203,20 @@ class AISystem extends System {
 			// Travel to task
 			if(Point.distance(position.point, destination) > 1) {
 				// Remove stationary component if present
-				var stationary = node.entity.get(Stationary);
-				if(stationary != null) {
+				if(node.entity.has(Stationary)) {
 					node.entity.remove(Stationary);
 				}
 
-				var area = lookAround(position.point, 4);
-				var target = position.point;
+				var area = map.lookAround(position.point, 6);
+				var target = position.point.clone();
+
 				if(node.entity.has(Path)) {
-					
-					var path = node.entity.get(Path);
+					var path:Path = node.entity.get(Path);
 					var point = path.next();
-					if(point != null) {
-						//trace("		is moving along her path");
-						target = position.point.clone().add(point.x, point.y);
-					} else {
+					if(point == null) {
 						node.entity.remove(Path);
+					} else {
+						target = path.origin.clone().addPoint(point);
 					}
 				} else {
 					target = movePosition(position.point, destination, area);
@@ -222,29 +227,26 @@ class AISystem extends System {
 					//trace("		did not move this time.");
 					// We didn't move, try again
 					var path = generatePath(position.point, destination, area);
-					if(path != null) {
-						trace(path);
-						var point = path.next();
-						if(point != null) {
-							target = position.point.clone().add(point.x, point.y);
-							node.entity.add(path);
-						}
-					} else {
-						node.entity.remove(Task);
+					if(path == null) {
+						dropTask(node.entity, node.task);
 						continue;
-						// TODO handle carried objects
+					} else {
+						trace(path);
+						node.entity.add(path);
 					}
 				}
 				
-
-				var collidee = EntityFactory.instance.workerAt(target.x, target.y);
+				// If the worker collides with another worker, swap their positions
+				var collidee = factory.workerAt(target.x, target.y);
 				if(collidee != null) {
 					collidee.get(Position).point = position.point;
 					node.entity.add(new Stationary());
 				}
 
+				// The target position is safe, move there
 				position.point = target;
 			} else {
+				// We have arrived at our destination
 				node.entity.add(new Stationary());
 				switch(node.task.action) {
 					case MINE: mineBlock(node.entity, node.task);
@@ -255,9 +257,7 @@ class AISystem extends System {
 			}
 		}
 
-
 		for (node in engine.getNodeList(MiningWorkerNode)) {
-			var block:Entity = node.mining.block;
 			var blockHealth:Health = node.mining.block.get(Health);
 			blockHealth.value -= node.mining.strength;
 
@@ -269,14 +269,15 @@ class AISystem extends System {
 			node.entity.remove(Mining);
 		}
 
+		// TODO move to different system
 		for (node in engine.getNodeList(AINode)) {
-			if(node.entity.has(TileImage)) {
-				var tileImage:TileImage = node.entity.get(TileImage);
-				if(node.entity.has(Ore)) {
-					tileImage.id = TileMapService.instance.enumMap.get(TileType.WORKER_ORE);
-				} else {
-					tileImage.id = TileMapService.instance.enumMap.get(TileType.WORKER);
-				}
+			if(!node.entity.has(TileImage)) continue;
+
+			var tileImage:TileImage = node.entity.get(TileImage);
+			if(node.entity.has(Ore)) {
+				tileImage.id = map.enumMap.get(TileType.WORKER_ORE);
+			} else {
+				tileImage.id = map.enumMap.get(TileType.WORKER);
 			}
 		}
 	}
@@ -292,19 +293,18 @@ class AISystem extends System {
 	private function takeOreToBase(entity:Entity,task:Task) {
 		trace("takeOreToBase");
 		entity.remove(Task);
-		var ore:Ore = task.target.remove(Ore);
-		if(ore == null) {
-			// TODO debug
-			//Main.log(task);
-		} else {
+
+		if(task.target.has(Ore)) {
+			var ore:Ore = task.target.remove(Ore);
+
 			entity.add(ore);
 
-			var returnTask:Task = EntityFactory.instance.getWalkingToBase();
+			var returnTask:Task = factory.getWalkingToBase();
 			returnTask.estimatedTime = entity.get(Worker).estimateTaskLength(returnTask, entity.get(Position).point);
 			entity.add(returnTask);
 		}
-		trace(task.target.name);
-		EntityFactory.instance.destroyEntity(task.target);
+
+		factory.destroyEntity(task.target);
 	}
 
 	private function completeWalk(entity:Entity, task:Task) {
@@ -316,7 +316,7 @@ class AISystem extends System {
 				var worker:Worker = entity.get(Worker);
 				worker.train(Skills.CARRY, entity.name);
 				// Estimate a little less time next time
-				//worker.tweakEstimations(task.timeTaken - task.estimatedTime);
+				worker.tweakEstimations(task.timeTaken - task.estimatedTime);
 				GameDataService.instance.requestOre();
 			}
 		}
@@ -324,8 +324,6 @@ class AISystem extends System {
 }
 
 typedef PathNode = {
-			var x:Int;
-			var y:Int;
-			var index:Int;
-			var parent:Null<PathNode>;
-		};
+	var index:Int;
+	var parent:Null<PathNode>;
+};
