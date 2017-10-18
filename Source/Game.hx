@@ -20,6 +20,7 @@ import services.UIService;
 
 import systems.AISystem;
 import systems.BlockSystem;
+import systems.RenderSystem;
 import systems.TaskSystem;
 import systems.TileRenderSystem;
 import systems.TockSystem;
@@ -70,6 +71,9 @@ class Game {
         var tileRenderSystem = new TileRenderSystem(gameLayer);
         engine.addSystem(tileRenderSystem, 9);
 
+        var renderSystem = new RenderSystem(uiLayer);
+        engine.addSystem(renderSystem, 10);
+
         factory.createGame();
 
         var tickProvider:ITickProvider = new FrameTickProvider(gameLayer);
@@ -78,7 +82,7 @@ class Game {
         tickProvider.add(camera.update);
         tickProvider.start();
 
-        var tockProvider:ITickProvider = new FixedTickProvider(gameLayer, 0.1);
+        var tockProvider:ITickProvider = new FixedTickProvider(gameLayer, 1);
         tockProvider.add(tockSystem.tock);
         tockProvider.add(blockSystem.tock);
         tockProvider.add(taskSystem.tock);

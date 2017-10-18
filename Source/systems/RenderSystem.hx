@@ -1,30 +1,30 @@
 package systems;
 
-import openfl.display.DisplayObject;
 import openfl.display.DisplayObjectContainer;
 
 import ash.core.Engine;
 import ash.core.NodeList;
 import ash.core.System;
 
-import nodes.RenderNode;
-import nodes.MarkerNode;
-
 import components.Marker;
-
-import components.Display;
 import components.TilePosition;
 
+import nodes.MarkerNode;
+
+
+import services.CameraService;
 
 class RenderSystem extends System
 {
     public var container:DisplayObjectContainer;
 
     private var nodes:NodeList<MarkerNode>;
+    private var camera:CameraService;
 
     public function new(container:DisplayObjectContainer) {
         super();
         this.container = container;
+        this.camera = CameraService.instance;
     }
 
     override public function addToEngine(engine:Engine):Void {
@@ -51,8 +51,9 @@ class RenderSystem extends System
             var marker:Marker = node.marker;
             var position:TilePosition = node.position;
 
-            marker.label.x = position.x;
-            marker.label.y = position.y;
+            var renderPoint = this.camera.gameToDisplay(position.absolute);
+            marker.label.x = renderPoint.x + GameConfig.tileSize;
+            marker.label.y = renderPoint.y - GameConfig.tileSize;
         }
     }
 

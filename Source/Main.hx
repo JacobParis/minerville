@@ -4,7 +4,12 @@ import openfl.display.Sprite;
 import openfl.events.Event;
 import openfl.Lib;
 
+import haxe.ui.Toolkit;
+import haxe.ui.containers.VBox;
+import haxe.ui.macros.ComponentMacros;
+
 class Main extends Sprite {
+    public static var ui:VBox;
 	
 	public function new() {
         super();
@@ -13,8 +18,12 @@ class Main extends Sprite {
 
     private function onEnterFrame(event:Event):Void {
         removeEventListener(Event.ENTER_FRAME, onEnterFrame);
+        Toolkit.init();
 
+        Main.ui = ComponentMacros.buildComponent("assets/ui/main.xml");
         new Game(this);
+        this.addChild(Main.ui);
+        
     }
 
     private static function main() {

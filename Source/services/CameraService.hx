@@ -10,7 +10,7 @@ import openfl.geom.Matrix;
 import interfaces.InputListener;
 
 import util.Util;
-
+import util.Point;
 /**
  *  This Service controls panning and zooming and the inputs required
  *  to make either of those functions work
@@ -103,6 +103,30 @@ class CameraService implements InputListener {
             EntityFactory.instance.markEntityAtPosition(x, y, "click");
         }
         this.isMouseDown = false;
+    }
+
+    public function gameToDisplay(coordinates:Point) {
+        var zoom = this.container.transform.matrix.a;
+        
+        var halfWidth:Float = this.container.stage.stageWidth / 2.0;
+        var halfHeight:Float = this.container.stage.stageHeight / 2.0;
+
+        var originX = (this.container.x - halfWidth) / zoom + halfWidth;
+        var originY = (this.container.y - halfHeight) / zoom + halfHeight;
+
+        var translatedX = coordinates.x + originX;
+        var translatedY = coordinates.y + originY;
+
+        var scaledX = translatedX - halfWidth;
+        var scaledY = translatedY - halfHeight;
+
+        var fromCenterX = scaledX * zoom;
+        var fromCenterY = scaledY * zoom;
+
+        var screenX = fromCenterX + halfWidth;
+        var screenY = fromCenterY + halfHeight;
+        
+        return new Point(screenX, screenY);
     }
 
     private function zoomCamera() {
