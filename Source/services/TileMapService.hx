@@ -190,6 +190,7 @@ class TileMapService {
      *  @param dir - Direction the map needs to expand
      */
     function shiftMap(dir:Direction) {
+        return;
         switch (dir) {
             case RIGHT:
                 GameConfig.tilesWide += 1;

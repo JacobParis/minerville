@@ -20,6 +20,7 @@ import services.UIService;
 
 import systems.AISystem;
 import systems.BlockSystem;
+import systems.ControlSystem;
 import systems.RenderSystem;
 import systems.TaskSystem;
 import systems.TileRenderSystem;
@@ -56,6 +57,9 @@ class Game {
         
         var tech = TechService.instance.initialize();
         
+        var controlSystem = new ControlSystem();
+        engine.addSystem(controlSystem, 2);
+
         var tockSystem = new TockSystem();
         engine.addSystem(tockSystem, 2);
 
@@ -82,7 +86,8 @@ class Game {
         tickProvider.add(camera.update);
         tickProvider.start();
 
-        var tockProvider:ITickProvider = new FixedTickProvider(gameLayer, 1);
+        var tockProvider:ITickProvider = new FixedTickProvider(gameLayer, 0.2);
+        tockProvider.add(controlSystem.tock);
         tockProvider.add(tockSystem.tock);
         tockProvider.add(blockSystem.tock);
         tockProvider.add(taskSystem.tock);

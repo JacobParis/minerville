@@ -114,8 +114,8 @@ class CameraService implements InputListener {
         var originX = (this.container.x - halfWidth) / zoom + halfWidth;
         var originY = (this.container.y - halfHeight) / zoom + halfHeight;
 
-        var translatedX = coordinates.x + originX;
-        var translatedY = coordinates.y + originY;
+        var translatedX = coordinates.x + originX + GameConfig.tilesLeft * GameConfig.tileSize;
+        var translatedY = coordinates.y + originY + GameConfig.tilesUp * GameConfig.tileSize;
 
         var scaledX = translatedX - halfWidth;
         var scaledY = translatedY - halfHeight;

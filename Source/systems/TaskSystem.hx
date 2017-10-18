@@ -6,6 +6,9 @@ import ash.core.NodeList;
 import ash.core.System;
 
 import components.ai.Mining;
+import components.ai.Walking;
+
+import components.Marker;
 
 import components.TilePosition;
 import components.Task;
@@ -52,16 +55,16 @@ class TaskSystem extends System {
 			
 			// Clean up bad tasks
 			if(task.target == null) {
-				trace("Task target is null");
 				TaskService.instance.removeTask(task);
 			}
 
 			if(task.timePosted == 0) task.timePosted = currentTime;
 			for (node in engine.getNodeList(WorkerNode)) {
-
 				// Remove workers that have tasks
 				if(node.entity.has(Task)) continue;
 				if(node.entity.has(Mining)) continue;
+				if(node.entity.has(Walking)) continue;
+				if(node.entity.has(Marker)) continue;
 			
 				//trace("		has no task and is not mining");
 				if(node.entity.has(TaskBid)) {
@@ -99,15 +102,21 @@ class TaskSystem extends System {
 			var winningEntity = null;
 
 			for (node in engine.getNodeList(BidNode)) {
-				if(task.target == node.bid.task.target
-				&& task.action == node.bid.task.action) {
-					if(node.bid.value > winningBid) {
-						winningBid = node.bid.value;
-						winningEntity = node.entity;
-					}
+				// Remove workers that have tasks
+				if(node.entity.has(Task)) continue;
+				if(node.entity.has(Mining)) continue;
+				if(node.entity.has(Walking)) continue;
+				if(node.entity.has(Marker)) continue;
 
-					winningEntity.remove(TaskBid);
+				if(task.target != node.bid.task.target) continue;
+				if(task.action != node.bid.task.action) continue;
+
+				if(node.bid.value > winningBid) {
+					winningBid = node.bid.value;
+					winningEntity = node.entity;
 				}
+
+				winningEntity.remove(TaskBid);
 			}
 
 			if(winningBid > 0) {

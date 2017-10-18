@@ -15,10 +15,8 @@ import components.Task;
 
 import components.Worker;
 import components.Stimulus;
-import components.TileImage;
-import components.ai.Walking;
+import components.Marker;
 import components.markers.ClickedEh;
-import components.tocks.BlockTock;
 
 import services.EntityFactory;
 import services.GameDataService;
@@ -27,7 +25,9 @@ import services.TechService;
 import services.TileMapService;
 
 import nodes.BlockNode;
+import nodes.MarkerNode;
 import nodes.OreNode;
+import nodes.WorkerNode;
 
 import util.Util;
 
@@ -53,35 +53,7 @@ class BlockSystem extends System {
 	}
 	
 	override public function update(_):Void {
-		for (node in engine.getNodeList(BlockNode)) {
-			if(node.entity.has(ClickedEh)) {
-				trace("CLICK");
-				node.entity.remove(ClickedEh);
 
-				TaskService.instance.addTask(new Task(Skills.MINE, node.entity), 10);
-				Main.log(TaskService.instance.getAllTasks());
-				/* Direct assigment
-				this.engine.getEntityByName("James")
-				.add(new Walking(node.position.x, node.position.y, node.entity)); */	
-			}
-
-			node.tile.tile.id = 2;
-		}
-
-		for (node in engine.getNodeList(OreNode)) {
-			if(node.entity.has(Worker)) {
-				engine.getNodeList(OreNode).remove(node);
-				continue;
-			}
-
-			if(node.entity.has(ClickedEh)) {
-				trace("CLICK");
-				
-				node.entity.remove(ClickedEh);
-
-				TaskService.instance.addTask(new Task(Skills.CARRY, node.entity), 10);
-			}
-		}
 	}
 
 	public function tock(_) {
@@ -97,9 +69,12 @@ class BlockSystem extends System {
 
 			// Kill if dead
 			if(node.health.value <= 0) {
-				trace(node.entity.name);
 				TileMapService.instance.destroyBlock(node.entity);
+				continue;
 			}
+
+			// TODO delegate to animation system
+			node.tile.tile.id = 2;
 		}
 
 		for (node in engine.getNodeList(OreNode)) {

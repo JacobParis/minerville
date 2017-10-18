@@ -52,7 +52,7 @@ class RenderSystem extends System
             var position:TilePosition = node.position;
 
             var renderPoint = this.camera.gameToDisplay(position.absolute);
-            marker.label.x = renderPoint.x + GameConfig.tileSize;
+            marker.label.x = renderPoint.x;
             marker.label.y = renderPoint.y - GameConfig.tileSize;
         }
     }
