@@ -12,7 +12,7 @@ import components.Task;
 import components.TaskBid;
 import components.Worker;
 
-import nodes.AINode;
+import nodes.WorkerNode;
 import nodes.BidNode;
 import nodes.TaskWorkerNode;
 
@@ -23,7 +23,7 @@ import util.Util;
 class TaskSystem extends System {
 	private var engine:Engine;
 	private var service:TaskService;
-	private var nodes:NodeList<AINode>;
+	private var nodes:NodeList<WorkerNode>;
 
 	private var tasks:Array<Task>;
 
@@ -34,7 +34,7 @@ class TaskSystem extends System {
 	
 	override public function addToEngine(engine:Engine):Void {
 		this.engine = engine;
-		this.nodes = engine.getNodeList(AINode);
+		this.nodes = engine.getNodeList(WorkerNode);
 		this.service = TaskService.instance;
 	}
 	
@@ -57,7 +57,7 @@ class TaskSystem extends System {
 			}
 
 			if(task.timePosted == 0) task.timePosted = currentTime;
-			for (node in engine.getNodeList(AINode)) {
+			for (node in engine.getNodeList(WorkerNode)) {
 
 				// Remove workers that have tasks
 				if(node.entity.has(Task)) continue;

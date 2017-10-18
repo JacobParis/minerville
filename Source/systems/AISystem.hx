@@ -19,7 +19,7 @@ import components.Worker;
 
 import components.ai.Mining;
 
-import nodes.AINode;
+import nodes.WorkerNode;
 import nodes.MiningWorkerNode;
 import nodes.OreWorkerNode;
 import nodes.TaskWorkerNode;
@@ -35,7 +35,7 @@ import util.Point;
 import util.Util;
 
 class AISystem extends System {
-    private var nodes:NodeList<AINode>;
+    private var nodes:NodeList<WorkerNode>;
 	private var engine:Engine;
 	private var map:TileMapService;
 	private var factory:EntityFactory;
@@ -45,7 +45,7 @@ class AISystem extends System {
     }
 	
 	override public function addToEngine(engine:Engine):Void {
-		this.nodes = engine.getNodeList(AINode);
+		this.nodes = engine.getNodeList(WorkerNode);
 		this.engine = engine;
 		this.map = TileMapService.instance;
 		this.factory = EntityFactory.instance;
@@ -270,7 +270,7 @@ class AISystem extends System {
 		}
 
 		// TODO move to different system
-		for (node in engine.getNodeList(AINode)) {
+		for (node in engine.getNodeList(WorkerNode)) {
 			if(!node.entity.has(TileImage)) continue;
 
 			var tileImage:TileImage = node.entity.get(TileImage);

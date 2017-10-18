@@ -30,7 +30,7 @@ import components.ai.Walking;
 
 import components.markers.ClickedEh;
 
-import nodes.AINode;
+import nodes.WorkerNode;
 import nodes.BlockNode;
 import nodes.TileNode;
 import nodes.StationaryObjectNode;
@@ -143,7 +143,7 @@ class EntityFactory {
      *  @return Null<Entity>
      */
     public function workerAt(x:Float, y:Float):Null<Entity> {
-        var nodes:NodeList<AINode> = engine.getNodeList(AINode);
+        var nodes:NodeList<WorkerNode> = engine.getNodeList(WorkerNode);
         for(node in nodes) {
             if(node.position.x == x
             && node.position.y == y) {

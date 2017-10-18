@@ -6,7 +6,7 @@ import ash.core.Node;
 import components.TilePosition;
 import components.Worker;
 
-class AINode extends Node<AINode> {
+class WorkerNode extends Node<WorkerNode> {
     public var position:TilePosition;
     public var worker:Worker;
 }
