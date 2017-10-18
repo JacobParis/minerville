@@ -16,6 +16,7 @@ import interfaces.InputListener;
 import components.Building;
 import components.GameState;
 import components.Health;
+import components.Loot;
 import components.Marker;
 import components.Ore;
 import components.Position;
@@ -63,7 +64,6 @@ class EntityFactory {
     }
 
     public function destroyEntity(entity:Entity):Void {
-        trace(entity.name);
         this.engine.removeEntity(entity);
     }
 
@@ -71,8 +71,6 @@ class EntityFactory {
         var entity = testHit(x, y);
         if(entity == null) return;
 
-        trace("Add clickmarker");
-        Main.log(entity);
         entity.add(new ClickedEh());
     }
 
@@ -223,7 +221,6 @@ class EntityFactory {
         var worker:Entity = new Entity(name)
         .add(new TilePosition(position.x + Util.anyOneOf([-1, 1]), position.y + Util.anyOneOf([-1, 1])))
         .add(new TileImage(tile, true))
-        .add(new Marker(name))
         .add(new Worker());
         
         this.engine.addEntity(worker);
@@ -236,6 +233,7 @@ class EntityFactory {
         .add(new TilePosition(cell.x, cell.y))
         .add(new Stationary())
         .add(new TileImage(tile, true))
+        .add(new Loot())
         .add(new Ore(id));
 
         this.engine.addEntity(ore);
