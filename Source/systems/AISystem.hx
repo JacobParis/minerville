@@ -9,6 +9,7 @@ import ash.core.System;
 
 import components.TilePosition;
 import components.Health;
+import components.Marker;
 import components.Ore;
 import components.Path;
 import components.Stationary;
@@ -52,7 +53,7 @@ class AISystem extends System {
 
 	}
 
-	private function movePosition(position:Point, destination:Point, surroundings:RelativeArray2D<Bool>):Point {
+	private function movePosition(position:Point, destination:Point, surroundings:RelativeArray2D<Bool>, debug:Bool = false):Point {
 		var deltaX = Util.sign(destination.x - position.x);
 		var deltaY = Util.sign(destination.y - position.y);
 		
@@ -81,11 +82,11 @@ class AISystem extends System {
 
 		if(verticalMove != null) return verticalMove;
 
-		//trace("Cannot move from " + position + " toward " + destination);
+		if(debug) trace("Cannot move from " + position + " toward " + destination);
 		return position;
 	}
 
-	private function generatePath(position:Point, destination:Point, surroundings:RelativeArray2D<Bool>):Null<Path> {
+	private function generatePath(position:Point, destination:Point, surroundings:RelativeArray2D<Bool>, debug:Bool = false):Null<Path> {
 		var distance = Util.fint(surroundings.width / 2.0);
 
 		var deltaX = Util.diff(destination.x, position.x);
@@ -113,24 +114,6 @@ class AISystem extends System {
 
 		while(openList.length > 0) {
 			var current = openList.pop();
-			
-			var point = surroundings.fromIndex(current.index);
-			if((point.x == targetX || targetX == null)
-			&& (point.y == targetY || targetY == null)) {
-				
-				var parent = current;
-				while (parent != null) {
-					surroundings.setIndex(parent.index, null);
-					
-					var absolutePoint = surroundings.fromIndexRelative(parent.index);
-
-					path.add(absolutePoint);
-					parent = parent.parent;
-				}
-
-				//trace(surroundings);
-				return path;
-			}
 
 			closedList.add(current);
 			
@@ -152,6 +135,23 @@ class AISystem extends System {
 					return false;
 				})()) continue;
 				
+				var point = surroundings.fromIndex(i);
+				if((point.x == targetX || targetX == null)
+				&& (point.y == targetY || targetY == null)) {
+					
+					var parent = current;
+					while (parent != null) {
+						surroundings.setIndex(parent.index, null);
+						
+						var absolutePoint = surroundings.fromIndexRelative(parent.index);
+
+						path.add(absolutePoint);
+						parent = parent.parent;
+					}
+					
+					return path;
+				}
+
 				if(surroundings.getIndex(i)) continue;
 
 				openList.add({
@@ -191,9 +191,13 @@ class AISystem extends System {
 		entity.remove(Task);	
 	}
 	public function tock(time:Float):Void {
+		
 		for (node in engine.getNodeList(TaskWorkerNode)) {
+			var debug = node.entity.has(Marker);
+			
 			// Drop task if it takes longer than expected
 			if(node.task.timeTaken++ > node.task.estimatedTime) {
+				
 				dropTask(node.entity, node.task);
 				continue;
 			}
@@ -202,8 +206,11 @@ class AISystem extends System {
 			var position:TilePosition = node.position;
 			// Travel to task
 			if(Point.distance(position.point, destination) > 1) {
+				
 				// Remove stationary component if present
-				if(node.entity.has(Stationary)) {
+				// Marked Entities should always be stationary
+				// This stops other workers from bumping them out of the way
+				if(node.entity.has(Stationary) && !node.entity.has(Marker)) {
 					node.entity.remove(Stationary);
 				}
 
@@ -220,19 +227,21 @@ class AISystem extends System {
 					}
 				} else {
 					target = movePosition(position.point, destination, area);
-				}
 				
-				if(target.x == position.point.x
-				&& target.y == position.point.y) {
-					//trace("		did not move this time.");
-					// We didn't move, try again
-					var path = generatePath(position.point, destination, area);
-					if(path == null) {
-						dropTask(node.entity, node.task);
-						continue;
-					} else {
-						trace(path);
-						node.entity.add(path);
+					if(target.x == position.point.x
+					&& target.y == position.point.y) {
+						if(debug) {
+							trace(node.entity.name + " did not move. Generating path...");
+						}
+						//trace("		did not move this time.");
+						// We didn't move, try again'
+						var path = generatePath(position.point, destination, area, debug);
+						if(path == null) {
+							dropTask(node.entity, node.task);
+							continue;
+						} else {
+							node.entity.add(path);
+						}
 					}
 				}
 				
@@ -261,6 +270,7 @@ class AISystem extends System {
 			var blockHealth:Health = node.mining.block.get(Health);
 			blockHealth.value -= node.mining.strength;
 
+			// TODO delegate to animation system
 			var blockTile:TileImage = node.mining.block.get(TileImage);
 			blockTile.id = 3;
 
