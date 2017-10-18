@@ -30,6 +30,6 @@ class Task {
     }
 
     public function toString() {
-        return this.action.getName + " -> " + target.name + " @ " + timePosted;
+        return this.action.getName() + " -> " + target.name + " @ " + timePosted;
     }
 }
