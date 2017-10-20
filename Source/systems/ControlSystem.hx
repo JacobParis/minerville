@@ -102,6 +102,7 @@ class ControlSystem extends System {
 				TaskService.instance.addTask(task, 10);
 			} else {
 				// Assign directly to worker
+				task.estimatedTime = this.markedEntity.get(Worker).estimateTaskLength(task, this.markedEntity.get(TilePosition).point);
 				this.markedEntity.add(task);
 			}	
 		}
