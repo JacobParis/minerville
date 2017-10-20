@@ -157,7 +157,6 @@ class TileMapService {
                 var id = this.enumMap.get(TileType.WALL);
     
                 var block = EntityFactory.instance.createBlock(new Point(neighbour.x, neighbour.y), id, Util.anyOneOf([2,2,3,3,4,4,4,5,6,7,8,9]));
-                TaskService.instance.addTask(new Task(Skills.MINE, block), 1.5);
             }
 
         }
@@ -180,8 +179,6 @@ class TileMapService {
 
         // TODO this should not be here
         var ore:Entity = EntityFactory.instance.createOre(cell, this.enumMap.get(TileType.ORE));
-        TaskService.instance.addTask(new Task(Skills.CARRY, ore));
-        
     }
 
     /**
@@ -190,7 +187,6 @@ class TileMapService {
      *  @param dir - Direction the map needs to expand
      */
     function shiftMap(dir:Direction) {
-        return;
         switch (dir) {
             case RIGHT:
                 GameConfig.tilesWide += 1;
