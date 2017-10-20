@@ -1,5 +1,7 @@
 package;
 
+import haxe.Timer;
+
 import openfl.display.DisplayObjectContainer;
 import openfl.display.Sprite;
 
@@ -13,6 +15,7 @@ import ash.core.Engine;
 import services.CameraService;
 import services.EntityFactory;
 import services.EventService;
+import services.GameDataService;
 import services.TaskService;
 import services.TechService;
 import services.TileMapService;
@@ -29,7 +32,9 @@ import systems.TockSystem;
 
 class Game {
 
-    
+    private var tickProvider:ITickProvider;
+    private var tockProvider:ITickProvider;
+    private var backgroundTickProvider:ITickProvider;
 
     public function new(container:DisplayObjectContainer) {
 
@@ -56,7 +61,8 @@ class Game {
         input.addListeners(camera);
         
         var tech = TechService.instance.initialize();
-        
+        var data = GameDataService.instance;
+
         var controlSystem = new ControlSystem();
         engine.addSystem(controlSystem, 2);
 
@@ -80,13 +86,17 @@ class Game {
 
         factory.createGame();
 
-        var tickProvider:ITickProvider = new FrameTickProvider(gameLayer);
+        tickProvider = new FrameTickProvider(gameLayer);
         tickProvider.add(input.dispatchEvents);
         tickProvider.add(engine.update);
         tickProvider.add(camera.update);
         tickProvider.start();
 
-        var tockProvider:ITickProvider = new FixedTickProvider(gameLayer, 0.2);
+        backgroundTickProvider = new FixedTickProvider(gameLayer, 0.2);
+        backgroundTickProvider.add(data.tock);
+        backgroundTickProvider.start();
+
+        tockProvider = new FixedTickProvider(gameLayer, 0.2);
         tockProvider.add(controlSystem.tock);
         tockProvider.add(tockSystem.tock);
         tockProvider.add(blockSystem.tock);
@@ -94,6 +104,30 @@ class Game {
         tockProvider.add(aiSystem.tock);
         tockProvider.add(ui.update);
         tockProvider.start();
+
+
+        untyped __js__ ("document.addEventListener(\"visibilitychange\", $bind(this, this.handleVisibilityChange));");
+    }
+
+    public function handleVisibilityChange(e:Dynamic) {
+        if(e == null || e.target == null || e.target.visibilityState == null) return;
+
+
+        switch(e.target.visibilityState) {
+            case "hidden": {
+                tickProvider.stop();
+                tockProvider.stop();
+                GameDataService.instance.pause();
+            }
+            case "visible": {
+                tickProvider.start();
+                tockProvider.start();
+
+                // Hacky thing to make the startday work
+                // Hopefully becomes obselete when the server comes in
+                Timer.delay(GameDataService.instance.resume, 200);
+            }
+        }
     }
 
         

@@ -7,11 +7,15 @@ import openfl.display.DisplayObjectContainer;
 import openfl.display.Tilemap;
 import openfl.display.Tileset;
 import openfl.display.Tile;
+import openfl.display.Graphics;
+import openfl.display.Sprite;
 
 import openfl.events.MouseEvent;
 
 import openfl.text.TextField;
+import openfl.text.TextFieldAutoSize;
 import openfl.text.TextFormat;
+import openfl.text.TextFormatAlign;
 import openfl.geom.Rectangle;
 
 import services.TaskService;
@@ -42,12 +46,18 @@ class UIService {
     private var pickaxeTile:Tile;
     private var pickaxeText:TextField;
 
+    private var curtain:Sprite;
+    private var curtainText:TextField;
+    private var curtainSubText:TextField;
+
     private function new() {
         this.data = GameDataService.instance;
     }
     
     public function initialize(container:DisplayObjectContainer):UIService {
         this.container = container;
+
+       
 
         Assets.loadBitmapData("assets/ui.png")
         .onComplete(function (bitmapData:BitmapData) {
@@ -78,6 +88,9 @@ class UIService {
             pickaxeText = addTextField(300, 12, "0");
 
             this.container.addEventListener(MouseEvent.MOUSE_UP, function(m:MouseEvent) {
+                if(this.curtain.visible) {
+                    this.curtain.visible = false;
+                }
                 if(this.container.stage.mouseX > 120
                 && this.container.stage.mouseX < 240) {
                     if(data.gold > 300) {
@@ -88,11 +101,55 @@ class UIService {
                     Main.log(TaskService.instance.getAllTasks());
                 }
             });
+
         });
 
+        this.curtain = new Sprite();
+        var background = new Sprite();
+        background.graphics.beginFill(0x050915, 0.8);
+        background.graphics.drawRect(0,0,this.container.stage.stageWidth, this.container.stage.stageHeight);
+        this.curtain.addChild(background);
+
+        var largeFormat = new TextFormat(null, 40, 0xFFFFFF);
+        largeFormat.align = TextFormatAlign.CENTER;
+
+        var smallFormat = new TextFormat(null, 20, 0xCCCCCC);
+        smallFormat.align = TextFormatAlign.CENTER;
+
+        this.curtainText = new TextField();
+        this.curtainText.autoSize = TextFieldAutoSize.CENTER;
+        this.curtainText.x = this.container.stage.stageWidth / 2 - this.curtainText.width / 2;
+        this.curtainText.y = this.container.stage.stageHeight / 2;
+        this.curtainText.text = "Welcome!";
+
+        this.curtainText.setTextFormat(largeFormat);
+        this.curtain.addChild(this.curtainText);
+
+        this.curtainSubText = new TextField();
+        this.curtainSubText.autoSize = TextFieldAutoSize.CENTER;
+        this.curtainSubText.x = this.container.stage.stageWidth / 2 - this.curtainSubText.width / 2;
+        this.curtainSubText.y = this.container.stage.stageHeight / 2 + 40;
+
+        this.curtainSubText.setTextFormat(smallFormat);
+        this.curtain.addChild(this.curtainSubText);
+
+        this.container.addChild(this.curtain);
+        
         return this;
     }
 	
+    public function showCurtain(?text:String, ?subText:String) {
+        this.curtain.visible = true;
+
+        if(text != null) {
+            this.curtainText.text = text;
+        }
+
+        if(subText != null) {
+            this.curtainSubText.text = subText;
+        }
+    }
+
     public function addTextField(x:Float, y:Float, ?defaultText:String):TextField {
         var textField = new TextField();
         textField.x = x;
