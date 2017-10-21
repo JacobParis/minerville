@@ -18,6 +18,7 @@ import services.EventService;
 import services.GameDataService;
 import services.TaskService;
 import services.TechService;
+import services.TimeService;
 import services.TileMapService;
 import services.UIService;
 
@@ -61,7 +62,7 @@ class Game {
         input.addListeners(camera);
         
         var tech = TechService.instance.initialize();
-        var data = GameDataService.instance;
+        var time = TimeService.instance;
 
         var controlSystem = new ControlSystem();
         engine.addSystem(controlSystem, 2);
@@ -93,7 +94,7 @@ class Game {
         tickProvider.start();
 
         backgroundTickProvider = new FixedTickProvider(gameLayer, 0.2);
-        backgroundTickProvider.add(data.tock);
+        backgroundTickProvider.add(time.tock);
         backgroundTickProvider.start();
 
         tockProvider = new FixedTickProvider(gameLayer, 0.2);
@@ -117,7 +118,7 @@ class Game {
             case "hidden": {
                 tickProvider.stop();
                 tockProvider.stop();
-                GameDataService.instance.pause();
+                TimeService.instance.pause();
             }
             case "visible": {
                 tickProvider.start();
@@ -125,7 +126,7 @@ class Game {
 
                 // Hacky thing to make the startday work
                 // Hopefully becomes obselete when the server comes in
-                Timer.delay(GameDataService.instance.resume, 200);
+                Timer.delay(TimeService.instance.resume, 200);
             }
         }
     }

@@ -106,7 +106,7 @@ class UIService {
 
         this.curtain = new Sprite();
         var background = new Sprite();
-        background.graphics.beginFill(0x050915, 0.8);
+        background.graphics.beginFill(0x1a237e, 1);
         background.graphics.drawRect(0,0,this.container.stage.stageWidth, this.container.stage.stageHeight);
         this.curtain.addChild(background);
 
@@ -120,7 +120,7 @@ class UIService {
         this.curtainText.autoSize = TextFieldAutoSize.CENTER;
         this.curtainText.x = this.container.stage.stageWidth / 2 - this.curtainText.width / 2;
         this.curtainText.y = this.container.stage.stageHeight / 2;
-        this.curtainText.text = "Welcome!";
+        this.curtainText.text = "Minerville";
 
         this.curtainText.setTextFormat(largeFormat);
         this.curtain.addChild(this.curtainText);
@@ -129,6 +129,7 @@ class UIService {
         this.curtainSubText.autoSize = TextFieldAutoSize.CENTER;
         this.curtainSubText.x = this.container.stage.stageWidth / 2 - this.curtainSubText.width / 2;
         this.curtainSubText.y = this.container.stage.stageHeight / 2 + 40;
+        this.curtainSubText.text = "Dawn of the First Day";
 
         this.curtainSubText.setTextFormat(smallFormat);
         this.curtain.addChild(this.curtainSubText);
