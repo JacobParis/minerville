@@ -4,6 +4,10 @@ import haxe.ui.core.Screen;
 import haxe.ui.components.Label;
 import haxe.ui.components.Button;
 import haxe.ui.containers.dialogs.DialogOptions;
+import haxe.ui.containers.ScrollView;
+import haxe.ui.containers.Box;
+
+
 import haxe.ui.macros.ComponentMacros;
 
 import openfl.Assets;
@@ -143,8 +147,9 @@ class UIService {
 		var dialog = ComponentMacros.buildComponent("assets/ui/events.xml");
 		
 		dialog.height = 400;
-
+        var events = dialog.findComponent(null, ScrollView, true);
         var notifications = NotificationService.instance.getNotifications();
+
 		for(note in notifications) {
 			var button = new Button();
 			button.text = note.type.getName() + ": " + note.value;
@@ -152,11 +157,10 @@ class UIService {
 			button.height = 40;
             button.onClick = function (_) {
                 NotificationService.instance.removeNotification(note);
-                dialog.removeComponent(button);
+                events.removeComponent(button);
             };
-			dialog.addComponent(button);
+			events.addComponent(button);
 		}
-
 		Screen.instance.showDialog(dialog, options);
     }
 	public function update(time:Float):Void {

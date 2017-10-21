@@ -5,7 +5,19 @@
     height: 40px;
 }
 
-scrollview {
+.box {
+    width: 100%;
+}
+.dialog .dialog-contents {
+    background-color: #81887f;
+}
+
+.tabview, .tabview-contents {
+    width: 100%;
+    background-color: #91887f;
+}
+.scrollview .scrollview-contents {
+    width: 300px;
     background-color: #a1887f;
 }
 
