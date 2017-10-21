@@ -1,0 +1,15 @@
+.notification {
+    width: 265px;
+    text-align: right;
+    color: #FFFFFF;
+    height: 40px;
+}
+
+scrollview {
+    background-color: #a1887f;
+}
+
+image {
+    width: 32px;
+    height: 32px;
+}

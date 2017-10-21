@@ -14,5 +14,6 @@
 	<haxeflag name="--connect" value="6000" />
 	<haxeflag name="-debug" />
 	<assets path="Assets" rename="assets" />
+	<assets path="Styles" rename="styles" />
 	
 </project>

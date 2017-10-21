@@ -1,5 +1,11 @@
 package services;
 
+import haxe.ui.core.Screen;
+import haxe.ui.components.Label;
+import haxe.ui.components.Button;
+import haxe.ui.containers.dialogs.DialogOptions;
+import haxe.ui.macros.ComponentMacros;
+
 import openfl.Assets;
 
 import openfl.display.BitmapData;
@@ -18,7 +24,14 @@ import openfl.text.TextFormat;
 import openfl.text.TextFormatAlign;
 import openfl.geom.Rectangle;
 
+import ash.core.Engine;
+
+import nodes.EventNode;
+
+import components.GameEvent;
+
 import services.TaskService;
+import services.NotificationService;
 
 import util.Util;
 
@@ -57,51 +70,10 @@ class UIService {
     public function initialize(container:DisplayObjectContainer):UIService {
         this.container = container;
 
-       
-
-        Assets.loadBitmapData("assets/ui.png")
-        .onComplete(function (bitmapData:BitmapData) {
-            var tileset = new Tileset(bitmapData);
-
-            GOLD = tileset.addRect(new Rectangle(0, 0, GameConfig.tileSize, GameConfig.tileSize));
-            ORE = tileset.addRect(new Rectangle(0, GameConfig.tileSize, GameConfig.tileSize, GameConfig.tileSize));
-            ORE_GLOW = tileset.addRect(new Rectangle(48, GameConfig.tileSize, GameConfig.tileSize, GameConfig.tileSize));
-            PICKAXE = tileset.addRect(new Rectangle(0, GameConfig.tileSize * 2, GameConfig.tileSize, GameConfig.tileSize));
-            PICKAXE_GLOW = tileset.addRect(new Rectangle(48, GameConfig.tileSize * 2, GameConfig.tileSize, GameConfig.tileSize));
-
-            this.tilemap = new Tilemap(container.stage.stageWidth, 60, tileset);
-            this.container.addChild(this.tilemap);
-
-            this.goldTile = new Tile(GOLD, 0, 8);
-            this.tilemap.addTile(goldTile);
-
-            goldText = addTextField(60, 12, "0");
-
-            this.oreTile = new Tile(ORE, 120, 8);
-            this.tilemap.addTile(oreTile);
-
-            oreText = addTextField(180, 12, "0");
-
-            this.pickaxeTile = new Tile(PICKAXE, 240, 8);
-            this.tilemap.addTile(pickaxeTile);
-
-            pickaxeText = addTextField(300, 12, "0");
-
-            this.container.addEventListener(MouseEvent.MOUSE_UP, function(m:MouseEvent) {
-                if(this.curtain.visible) {
-                    this.curtain.visible = false;
-                }
-                if(this.container.stage.mouseX > 120
-                && this.container.stage.mouseX < 240) {
-                    if(data.gold > 300) {
-                        data.buyRefinery();
-                    }
-                }
-                if(this.container.stage.mouseX > 240) {
-                    Main.log(TaskService.instance.getAllTasks());
-                }
-            });
-
+        this.container.addEventListener(MouseEvent.MOUSE_UP, function(m:MouseEvent) {      
+            if(this.curtain.visible) {
+                this.curtain.visible = false;
+            }
         });
 
         this.curtain = new Sprite();
@@ -164,21 +136,26 @@ class UIService {
         return textField;
     }
 
+    public function showNotifications() {
+        var options = new DialogOptions();
+		options.title = "Notifications";
+
+		var dialog = ComponentMacros.buildComponent("assets/ui/events.xml");
+		
+		dialog.height = 400;
+
+        var notifications = NotificationService.instance.getNotifications();
+		for(note in notifications) {
+			var button = new Button();
+			button.text = note.type.getName() + ": " + note.value;
+			button.styleNames = "notification";
+			button.height = 40;
+			dialog.addComponent(button);
+		}
+
+		Screen.instance.showDialog(dialog, options);
+    }
 	public function update(time:Float):Void {
-        this.goldText.text = data.gold;
-        this.oreText.text = data.ore;
-        this.pickaxeText.text = data.miners;
-
-        if(data.gold > 100) {
-            this.pickaxeTile.id = PICKAXE_GLOW;
-        } else {
-            this.pickaxeTile.id = PICKAXE;
-        }
-
-        if(data.gold > 300) {
-            this.oreTile.id = ORE_GLOW;
-        } else {
-            this.oreTile.id = ORE;
-        }
+       
 	}
 }
