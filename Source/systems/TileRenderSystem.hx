@@ -43,9 +43,12 @@ class TileRenderSystem extends System {
     }
 
     private function addToDisplay(node:TileNode):Void {
+        node.tile.x = (node.position.x + GameConfig.tilesLeft) * GameConfig.tileSize;
+        node.tile.y = (node.position.y + GameConfig.tilesUp) * GameConfig.tileSize;
         if(node.tile.isForeground) {
             map.addForegroundTile(node.tile.tile);
         } else {
+            
 		    map.addBackdropTile(new Point(node.position.x, node.position.y), node.tile.tile);
         }
     }
