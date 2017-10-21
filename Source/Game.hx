@@ -11,6 +11,7 @@ import ash.tick.ITickProvider;
 import ash.tick.FrameTickProvider;
 import ash.tick.FixedTickProvider;
 import ash.core.Engine;
+import ash.core.System;
 
 import services.CameraService;
 import services.EntityFactory;
@@ -25,6 +26,7 @@ import services.UIService;
 import systems.AISystem;
 import systems.BlockSystem;
 import systems.ControlSystem;
+import systems.EventSystem;
 import systems.RenderSystem;
 import systems.TaskSystem;
 import systems.TileRenderSystem;
@@ -32,6 +34,9 @@ import systems.TockSystem;
 
 
 class Game {
+
+    private var engine:Engine;
+    private var nextSystemPriority:Int = 1;
 
     private var tickProvider:ITickProvider;
     private var tockProvider:ITickProvider;
@@ -46,7 +51,7 @@ class Game {
         container.addChild(uiLayer);
 
         
-        var engine = new Engine();
+        this.engine = new Engine();
         var factory = EntityFactory.instance.initialize(engine);
 
         var ui = UIService.instance.initialize(uiLayer);
@@ -65,25 +70,28 @@ class Game {
         var time = TimeService.instance;
 
         var controlSystem = new ControlSystem();
-        engine.addSystem(controlSystem, 2);
+        addSystem(controlSystem);
 
         var tockSystem = new TockSystem();
-        engine.addSystem(tockSystem, 2);
+        addSystem(tockSystem);
 
         var taskSystem = new TaskSystem();
-        engine.addSystem(taskSystem, 3);
+        addSystem(taskSystem);
 
         var aiSystem = new AISystem();
-        engine.addSystem(aiSystem, 4);
+        addSystem(aiSystem);
 
         var blockSystem = new BlockSystem();
-        engine.addSystem(blockSystem, 8);
+        addSystem(blockSystem);
 
+        var eventSystem = new EventSystem();
+        addSystem(eventSystem);
+        
         var tileRenderSystem = new TileRenderSystem(gameLayer);
-        engine.addSystem(tileRenderSystem, 9);
+        addSystem(tileRenderSystem);
 
         var renderSystem = new RenderSystem(uiLayer);
-        engine.addSystem(renderSystem, 10);
+        addSystem(renderSystem);
 
         factory.createGame();
 
@@ -129,6 +137,12 @@ class Game {
                 Timer.delay(TimeService.instance.resume, 200);
             }
         }
+    }
+
+    private function addSystem(system:System):System {
+        this.engine.addSystem(system, this.nextSystemPriority++);
+
+        return system;
     }
 
         
