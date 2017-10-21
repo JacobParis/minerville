@@ -150,6 +150,10 @@ class UIService {
 			button.text = note.type.getName() + ": " + note.value;
 			button.styleNames = "notification";
 			button.height = 40;
+            button.onClick = function (_) {
+                NotificationService.instance.removeNotification(note);
+                dialog.removeComponent(button);
+            };
 			dialog.addComponent(button);
 		}
 

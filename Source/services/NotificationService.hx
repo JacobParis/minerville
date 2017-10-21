@@ -21,6 +21,10 @@ class NotificationService {
         this.queue.push(event);
     }
 
+    public function removeNotification(event:GameEvent) {
+        this.queue.remove(event);
+    }
+    
 	public function update(time:Float):Void {
 	
 	}
