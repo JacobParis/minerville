@@ -1,5 +1,9 @@
 package services;
 
+import components.GameEvent;
+
+import enums.EventTypes;
+
 import util.Util;
 
 /**
@@ -27,7 +31,16 @@ class GameDataService {
 
     
     public function requestOre() {
-        this.ore += Util.anyOneOf([1,1,2,3,3,4,5,7,11]);
+             if(Util.chance(0.5)) { this.gold += Util.anyOneOf([1,2,3,4,5]);}
+        else if(Util.chance(0.5)) { this.gold += Util.anyOneOf([11,12,13,14,15]);}
+        else if(Util.chance(0.5)) { this.gold += Util.anyOneOf([10,20,30,40,50]);}
+        else if(Util.chance(0.5)) { 
+            var loot =  Util.anyOneOf([100,200,300,400,500]);
+            this.gold += loot;
+            NotificationService.instance.addNotification(new GameEvent(EventTypes.LOOT, cast loot));
+        }
+
+        trace("Gold: " + this.gold);
     }
 
     public function buyMiner() {

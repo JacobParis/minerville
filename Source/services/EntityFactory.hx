@@ -14,6 +14,7 @@ import ash.tools.ComponentPool;
 import interfaces.InputListener;
 
 import components.Building;
+import components.GameEvent;
 import components.GameState;
 import components.Health;
 import components.Loot;
@@ -27,10 +28,13 @@ import components.TileImage;
 import components.TilePosition;
 import components.Worker;
 
+
+
 import components.ai.Walking;
 
 import components.markers.ClickedEh;
 
+import enums.EventTypes;
 import nodes.WorkerNode;
 import nodes.BlockNode;
 import nodes.TileNode;
@@ -151,6 +155,18 @@ class EntityFactory {
         return null;
     }
 
+
+    public function findSurfaceBlock():Null<Entity> {
+        for(node in engine.getNodeList(BlockNode)) {
+            var xpoint = node.position.point.clone().add(1, 0);
+            var ypoint = node.position.point.clone().add(0, 1);
+
+            if(blockAt(xpoint.x, xpoint.y) == null) return node.entity;
+            if(blockAt(ypoint.x, ypoint.y) == null) return node.entity;
+        }        
+
+        return null;
+    }
     /**
      *  Swap two components from one entity to another
      *  @param entity1 - 

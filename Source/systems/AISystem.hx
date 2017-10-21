@@ -319,7 +319,6 @@ class AISystem extends System {
 
 	private function completeWalk(entity:Entity, task:Task) {
 		//trace("completeWalk");
-		entity.remove(Task);
 		if(task.target.name == Buildings.BASE.getName()) {
 			if(entity.has(Ore)) {
 				entity.remove(Ore);
@@ -328,8 +327,11 @@ class AISystem extends System {
 				// Estimate a little less time next time
 				worker.tweakEstimations(task.timeTaken - task.estimatedTime);
 				GameDataService.instance.requestOre();
+			} else {
+				trace("Worker did not have Ore");
 			}
 		}
+		entity.remove(Task);
 	}
 }
 
