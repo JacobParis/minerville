@@ -67,68 +67,36 @@ class TileMapService {
             container.addChild(this.backdrops);
             container.addChild(this.actives);
 
-            // Figure out which coordinates will show the center of the visible screen at start
-            var virtualWidth:Int = Util.fint(container.stage.stageWidth / GameConfig.tileSize);
-            var virtualHeight:Int = Util.fint(container.stage.stageHeight / GameConfig.tileSize);
-
             // Draw a diamond shaped tile pattern with walls at the edge
             var startArea = [
-                0,  0,  2,  2,  2, 2,  0,  0,
-                0,  2,  2,  1,  7, 2,  2,  0,
-                2,  2,  1,  1,  1, 2,  2,  2,
-                2,  1,  1,  1,  1, 2,  7,  2,
-                2,  7,  1,  1,  1, 7,  7,  2,
-                2,  2,  2,  1,  1, 2,  2,  2,
-                0,  0,  2,  1,  7, 2,  0,  0,
-                0,  0,  2,  2,  2, 2,  0,  0
+                0,  2,  2,  2,  2,  2,  2,  0,
+                2,  2,  1,  1,  4,  1,  2,  2,
+                2,  1,  1,  1,  1,  1,  1,  2,
+                2,  1,  1,  1,  1,  1,  1,  2,
+                2,  7,  1,  1,  5,  1,  7,  2,
+                2,  7,  1,  1,  1,  1,  1,  2,
+                2,  2,  7,  1,  1,  7,  2,  2,
+                0,  2,  2,  2,  2,  2,  2,  0
             ];
-
-            var centerX:Int = Util.fint(virtualWidth / 2);
-            var centerY:Int = Util.fint(virtualHeight / 2);
 
             // Create a tile for each tile in the startArea
             for (i in 0...startArea.length) {
                 var id = startArea[i];
-                if(id == this.enumMap.get(TileType.EMPTY)) continue;
-                
-                var x = i % 8 + centerX - 3;
-                var y = Util.fint(i / 8) + centerY - 3;
-                
-                if(x == centerX && y == centerY) continue;
+                var x = i % 8;
+                var y = Util.fint(i / 8);
 
-                if(id == this.enumMap.get(TileType.FLOOR)) {
-                    // Create static tile
-                    var tile = new Tile(id, x * GameConfig.tileSize, y * GameConfig.tileSize);
-                    addBackdropTile(new Point(x, y), tile);
-                    continue;
+                switch(TileType.createByIndex(id)) {
+                    case EMPTY: continue;
+                    case ORE: EntityFactory.instance.createOre(new Point(x, y), id);
+                    case WALL: EntityFactory.instance.createBlock(new Point(x, y), id, Util.anyOneOf([2,2,3,3,4,4,4,5,6,7,8,9]));
+                    case BASE: EntityFactory.instance.createBuilding(new Point(x, y), id, Buildings.BASE);
+                    case WORKER: EntityFactory.instance.createWorker("Alice");
+                    default: 1;
                 }
 
-                if(id == this.enumMap.get(TileType.ORE)) {
-                    // Create static tile
-                    var tile = new Tile(this.enumMap.get(TileType.FLOOR), x * GameConfig.tileSize, y * GameConfig.tileSize);
-                    addBackdropTile(new Point(x, y), tile);
-
-                    
-                    var ore:Entity = EntityFactory.instance.createOre(new Point(x, y), id);
-                    continue;
-                }
-                
-                EntityFactory.instance.createBlock(new Point(x, y), id, Util.anyOneOf([2,2,3,3,4,4,4,5,6,7,8,9]));
-                
+                var floor = new Tile(this.enumMap.get(TileType.FLOOR), (x + GameConfig.tilesLeft) * GameConfig.tileSize, (y + GameConfig.tilesUp) * GameConfig.tileSize);
+                addBackdropTile(new Point(x, y), floor);
             }
-
-            // Create base
-            var id = this.enumMap.get(TileType.BASE);
-            EntityFactory.instance.createBuilding(new Point(centerX, centerY), id, Buildings.BASE);
-            EntityFactory.instance.createWorker("Alice");
-            EntityFactory.instance.createWorker("Bob");
-            EntityFactory.instance.createWorker("Carol");
-            //EntityFactory.instance.createWorker("Doug");
-            //EntityFactory.instance.createWorker("Evelyn");
-            //EntityFactory.instance.createWorker("Fred");
-            //EntityFactory.instance.createWorker("Georgia");
-
-
         });
 
         
@@ -147,35 +115,24 @@ class TileMapService {
         .divide(GameConfig.tileSize)
         .add(-GameConfig.tilesLeft, -GameConfig.tilesUp);
 
-        var neighbours = [new Point(1, 0), new Point(0, -1), new Point(-1, 0), new Point(0, 1)];
+        var neighbours = [new Point(1, 0), new Point(1, -1), new Point(0, -1), new Point(-1, -1), new Point(-1, 0), new Point(-1, 1),new Point(0, 1), new Point(1, 1)];
         for(neighbour in neighbours) {
             neighbour.add(cell.x, cell.y);
 
             var neighbourTile = positionMap.get(neighbour);
-            
-            if (neighbourTile == null) {
-                var id = this.enumMap.get(TileType.WALL);
-    
-                var block = EntityFactory.instance.createBlock(new Point(neighbour.x, neighbour.y), id, Util.anyOneOf([2,2,3,3,4,4,4,5,6,7,8,9]));
-            }
+            if (neighbourTile != null) continue; //There is already a tile here
 
+            var floor = new Tile(this.enumMap.get(TileType.FLOOR), (neighbour.x + GameConfig.tilesLeft) * GameConfig.tileSize, (neighbour.y + GameConfig.tilesUp) * GameConfig.tileSize);
+            addBackdropTile(new Point(neighbour.x, neighbour.y), floor);
+
+            var id = this.enumMap.get(TileType.WALL);
+            EntityFactory.instance.createBlock(new Point(neighbour.x, neighbour.y), id, Util.anyOneOf([2,2,3,3,4,4,4,5,6,7,8,9]));
         }
-
-        var corners = [new Point(1, 1), new Point(1, -1), new Point(-1, 1), new Point(-1, -1)];
-        for(corner in corners) {
-            corner.add(cell.x, cell.y);
-
-            var cornerTile = positionMap.get(corner);
-            if (cornerTile == null) {
-                var id = this.enumMap.get(TileType.WALL);
-                EntityFactory.instance.createBlock(new Point(corner.x, corner.y), id, Util.anyOneOf([2,2,3,3,4,4,4,5,6,7,8,9]));
-            }
-        }
-
-        var floorTile = new Tile(this.enumMap.get(TileType.FLOOR), tile.x  , tile.y );
         
         EntityFactory.instance.destroyEntity(entity);
-        addBackdropTile(cell, floorTile);
+
+        var floor = new Tile(this.enumMap.get(TileType.FLOOR), tile.x, tile.y);
+        addBackdropTile(new Point(cell.x, cell.y), floor);
 
         // TODO this should not be here
         var ore:Entity = EntityFactory.instance.createOre(cell, this.enumMap.get(TileType.ORE));
@@ -187,30 +144,31 @@ class TileMapService {
      *  @param dir - Direction the map needs to expand
      */
     function shiftMap(dir:Direction) {
+        var amount = 1;
         switch (dir) {
             case RIGHT:
-                GameConfig.tilesWide += 1;
-                this.backdrops.width += GameConfig.tileSize;
+                GameConfig.tilesWide += amount;
+                this.backdrops.width += amount * GameConfig.tileSize;
             case LEFT:
-                GameConfig.tilesWide += 1;
-                GameConfig.tilesLeft += 1;
-                this.backdrops.width += GameConfig.tileSize;
+                GameConfig.tilesWide += amount;
+                GameConfig.tilesLeft += amount;
+                this.backdrops.width += amount * GameConfig.tileSize;
 
                 for(i in 0...this.backdrops.numTiles) {
                     var tile:Tile = this.backdrops.getTileAt(i);
-                    tile.x += GameConfig.tileSize;
+                    tile.x += amount * GameConfig.tileSize;
                 }
             case DOWN:
-                GameConfig.tilesHigh += 1;
-                this.backdrops.height += GameConfig.tileSize;
+                GameConfig.tilesHigh += amount;
+                this.backdrops.height += amount * GameConfig.tileSize;
             case UP:
-                GameConfig.tilesHigh += 1;
-                GameConfig.tilesUp += 1;
-                this.backdrops.height += GameConfig.tileSize;
+                GameConfig.tilesHigh += amount;
+                GameConfig.tilesUp += amount;
+                this.backdrops.height += amount * GameConfig.tileSize;
 
                 for(i in 0...this.backdrops.numTiles) {
                     var tile:Tile = this.backdrops.getTileAt(i);
-                    tile.y += GameConfig.tileSize;
+                    tile.y += amount * GameConfig.tileSize;
                 }
         }
 
@@ -218,7 +176,9 @@ class TileMapService {
         this.actives.width = this.backdrops.width;
         this.actives.height = this.backdrops.height;
     }
-    public function addBackdropTile(point:Point, tile:Tile) {
+    public function addBackdropTile(point:Point, tile:Tile):Point {
+        var origin = new Point(GameConfig.tilesLeft, GameConfig.tilesUp);
+
         if(point.x + 1 > GameConfig.tilesWide - GameConfig.tilesLeft) {
             shiftMap(Direction.RIGHT);
         }
@@ -239,8 +199,11 @@ class TileMapService {
         if(positionMap.get(point) != null) {
             backdrops.removeTile(positionMap.get(point));
         }
+
         positionMap.set(point, tile);
         backdrops.addTileAt(tile, backdrops.numTiles + 1);
+
+        return origin.add(-GameConfig.tilesLeft, -GameConfig.tilesUp);
     }
 
     public function addForegroundTile(tile:Tile) {
