@@ -55,6 +55,7 @@ class TechService {
         switch(tech.name) {
             case "mine-dirt": EntityFactory.instance.createMiningTool(5);
             case "mine-stone": EntityFactory.instance.createMiningTool(10);
+            case "worker": EntityFactory.instance.createWorker();
             default: 1;
         }
 
