@@ -64,13 +64,13 @@ class TimeService {
         var gold = 0;
 
         for(i in 0...delta) {
-            if(Util.chance(0.5)) continue;
+            if(Util.chance(0.9)) continue;
             else if(Util.chance(0.9)) { gold += Util.anyOneOf([1,2,3,4,5]);}
             else if(Util.chance(0.9)) { gold += Util.anyOneOf([11,12,13,14,15]);}
             else if(Util.chance(0.9)) { gold += Util.anyOneOf([10,20,30,40,50]);}
             else if(Util.chance(0.1)) { gold += Util.anyOneOf([100,200,300,400,500]);}
 
-            if(Util.chance(0.01)) {
+            if(Util.chance(0.1)) {
                 var block = EntityFactory.instance.findBlock();
                 if(block != null) {
                     TileMapService.instance.destroyBlock(block);
