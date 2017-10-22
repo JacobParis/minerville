@@ -7,6 +7,7 @@ import openfl.events.MouseEvent;
 
 import ash.core.Entity;
 import ash.core.Engine;
+import ash.core.Node;
 import ash.core.NodeList;
 import ash.fsm.EntityStateMachine;
 import ash.tools.ComponentPool;
@@ -16,6 +17,7 @@ import interfaces.InputListener;
 import components.Building;
 import components.GameEvent;
 import components.GameState;
+import components.Hardness;
 import components.Health;
 import components.Loot;
 import components.Marker;
@@ -26,6 +28,7 @@ import components.Stimulus;
 import components.Task;
 import components.TileImage;
 import components.TilePosition;
+import components.ToolMining;
 import components.Worker;
 
 
@@ -37,6 +40,7 @@ import components.markers.ClickedEh;
 import enums.EventTypes;
 import nodes.WorkerNode;
 import nodes.BlockNode;
+import nodes.OreNode;
 import nodes.TileNode;
 import nodes.StationaryObjectNode;
 
@@ -155,18 +159,16 @@ class EntityFactory {
         return null;
     }
 
-
-    public function findSurfaceBlock():Null<Entity> {
-        for(node in engine.getNodeList(BlockNode)) {
-            var xpoint = node.position.point.clone().add(1, 0);
-            var ypoint = node.position.point.clone().add(0, 1);
-
-            if(blockAt(xpoint.x, xpoint.y) == null) return node.entity;
-            if(blockAt(ypoint.x, ypoint.y) == null) return node.entity;
-        }        
-
+    private function grabEntityFromNode<TNode:Node<TNode>>(nodeClass:Class<TNode>) {
+        for(node in engine.getNodeList(nodeClass)) {
+            return node.entity;
+        }
         return null;
     }
+
+    public function findBlock() return this.engine.getNodeList(BlockNode).head.entity;
+    public function findOre() return this.engine.getNodeList(OreNode).head.entity;
+
     /**
      *  Swap two components from one entity to another
      *  @param entity1 - 
@@ -224,6 +226,7 @@ class EntityFactory {
         .add(new TilePosition(cell.x, cell.y))
         .add(new Stationary())
         .add(new TileImage(tile))
+        .add(new Hardness(1))
         .add(new Health(health));
 
         this.engine.addEntity(block);
@@ -241,6 +244,19 @@ class EntityFactory {
         
         this.engine.addEntity(worker);
         return worker;
+    }
+
+    public function createMiningTool(strength:Int):Entity {
+        var base:Entity = this.engine.getEntityByName(Buildings.BASE.getName());
+        var position:TilePosition = base.get(TilePosition);
+        var tool:Entity = new Entity()
+        .add(new TilePosition(position.x + Util.anyOneOf([-1, 1]), position.y + Util.anyOneOf([-1, 1])))
+        .add(new TileImage(new Tile(8), true))
+        .add(new Loot())
+        .add(new ToolMining(strength));
+
+        this.engine.addEntity(tool);
+        return tool;
     }
 
     public function createOre(cell:Point, id:Int):Entity {
