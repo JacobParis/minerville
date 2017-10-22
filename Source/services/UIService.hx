@@ -180,21 +180,42 @@ class UIService {
         var technologies2 = TechService.instance.getAvailableTech();
         for(tech in technologies2) {
             var button = new Button();
-			button.text = tech.displayName + " (" + tech.price + ")";
+			button.text = tech.displayName + " (Buy for " + tech.price + "g)";
 			button.styleNames = "button-row";
             button.onClick = function (_) {
-                TechService.instance.purchaseTech(tech);
-                button.text = tech.displayName + "✓";
-                button.disabled = true;
+                if(!TechService.instance.purchaseTech(tech)) return;
+                if(tech.unique) {
+                    button.text = tech.displayName + "✓";
+                    button.disabled = true;
+                } else {
+                    button.text = tech.displayName + " (" + tech.purchased++ + ")" ;
+                }
             }
+
+            if(tech.price > GameDataService.instance.gold) button.disabled = true;
 			techTab.addComponent(button);
         }
 
         var technologies = TechService.instance.getPurchasedTech();
         for(tech in technologies) {
             var button = new Button();
-			button.text = tech.displayName + "✓";
-            button.disabled = true;
+
+            if(tech.unique) {
+                button.text = tech.displayName + "✓";
+                button.disabled = true;
+            } else {
+                button.text = tech.displayName + " (" + tech.purchased + ")" ;
+                button.onClick = function (_) {
+                    if(!TechService.instance.purchaseTech(tech)) return;
+                    if(tech.unique) {
+                        button.text = tech.displayName + "✓";
+                        button.disabled = true;
+                    } else {
+                        button.text = tech.displayName + " (" + tech.purchased + ")" ;
+                    }
+                }
+            }
+            if(tech.price > GameDataService.instance.gold) button.disabled = true;
 			button.styleNames = "button-row purchased";
 			techTab.addComponent(button);
         }
