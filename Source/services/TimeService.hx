@@ -71,11 +71,18 @@ class TimeService {
             else if(Util.chance(0.1)) { gold += Util.anyOneOf([100,200,300,400,500]);}
 
             if(Util.chance(0.01)) {
-                var block = EntityFactory.instance.findSurfaceBlock();
+                var block = EntityFactory.instance.findBlock();
                 if(block != null) {
-                    Main.log(block.get(TileImage));
                     TileMapService.instance.destroyBlock(block);
                 }
+            }
+        }
+
+        for(i in 0...delta) {
+            var ore = EntityFactory.instance.findOre();
+            if(ore != null) {
+                EntityFactory.instance.destroyEntity(ore);
+                gold += Util.anyOneOf([1,2,3,4,5]);
             }
         }
 
