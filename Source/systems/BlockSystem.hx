@@ -59,7 +59,7 @@ class BlockSystem extends System {
 	public function tock(_) {
 		for (node in engine.getNodeList(BlockNode)) {
 			// Randomly ask to be mined
-			if(TechService.instance.isTechUnlocked("search-dirt", Categories.MINE)) {
+			if(TechService.instance.isTechUnlocked("search-dirt")) {
 				if(node.entity.has(Stimulus)) {
 					TaskService.instance.addTask(new Task(Skills.MINE, node.entity), node.entity.get(Stimulus).strength);
 				} else if(Util.chance(0.5)) {
@@ -83,7 +83,7 @@ class BlockSystem extends System {
 				continue;
 			}
 			// Randomly ask to be collected
-			if(TechService.instance.isTechUnlocked("search-ore", Categories.CARRY)) {
+			if(TechService.instance.isTechUnlocked("search-ore")) {
 				if(node.entity.has(Stimulus)) {
 					TaskService.instance.addTask(new Task(Skills.CARRY, node.entity), node.entity.get(Stimulus).strength);
 				} else if(Util.chance(0.8)) {

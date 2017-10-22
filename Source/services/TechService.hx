@@ -7,40 +7,28 @@ import util.Util;
 
 class TechService {
     public static var instance(default, null):TechService = new TechService();
-    private var carryTech:Array<TechDefinition>;
-    private var mineTech:Array<TechDefinition>;
-    private var buildTech:Array<TechDefinition>;
     private var tech:Array<TechDefinition>;
     
     private function new() {}
     
     public function initialize():TechService {
         var json = Json.parse(Assets.getText("assets/techtree.json"));
-        this.carryTech = cast json.carry;
-        this.mineTech = cast json.mine;
-        this.buildTech = cast json.build;
         this.tech = cast json.tech;
         return this;
     }
 	
-    private function getTechFromName(name:String, category:Categories):Null<TechDefinition> {
+    private function getTechFromName(name:String):Null<TechDefinition> {
         var array:Array<TechDefinition>;
 
-        switch(category) {
-            case CARRY: array = this.carryTech;
-            case MINE: array = this.mineTech;
-            case BUILD: array = this.buildTech;
-        }
-
-        for(tech in array) {
+        for(tech in this.tech) {
             if(tech.name == name) return tech;
         }
 
         return null;
     }
 
-    public function isTechUnlocked(name:String, category:Categories):Bool {
-        var tech = getTechFromName(name, category);
+    public function isTechUnlocked(name:String):Bool {
+        var tech = getTechFromName(name);
         //trace("Checking if " + name +  " is unlocked.");Main.log(tech);
         return tech.purchased;
     }
@@ -49,14 +37,21 @@ class TechService {
         return this.tech;
     }
 
-    public function setTechToPurchased(tech:TechDefinition) {
+    private function setTechToPurchased(tech:TechDefinition) {
+        
+    }
+
+    public function purchaseTech(tech:TechDefinition) {
         var index = this.tech.indexOf(tech);
         if(index == -1) return;
 
+        var data = GameDataService.instance;
+        if(tech.price > data.gold) return;
+
+        data.gold -= tech.price;
         tech.purchased = true;
         this.tech[index] = tech;
     }
-    
     public function getPurchasedTech():Array<TechDefinition> {
         var array:Array<TechDefinition> = new Array<TechDefinition>();
         for(tech in this.tech) {
@@ -103,16 +98,12 @@ class TechService {
 	}
 }
 
-enum Categories {
-    CARRY;
-    MINE;
-    BUILD;
-}
 class TechDefinition {
     public var name:String;
     public var displayName:String;
     public var description:String;
     public var dependencies:Array<String>;
+    public var price:Int;
 
     public var purchased:Bool = false;
     public var visible:Bool;
