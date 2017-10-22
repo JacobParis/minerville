@@ -54,7 +54,7 @@ class TaskSystem extends System {
 		for(task in queue) {
 			
 			// Clean up bad tasks
-			if(task.target == null) {
+			if(task.target == null || engine.getEntityByName(task.target.name) == null) {
 				TaskService.instance.removeTask(task);
 			}
 
