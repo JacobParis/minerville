@@ -160,14 +160,13 @@ class EntityFactory {
     }
 
     private function grabEntityFromNode<TNode:Node<TNode>>(nodeClass:Class<TNode>) {
-        for(node in engine.getNodeList(nodeClass)) {
-            return node.entity;
-        }
-        return null;
+        var node = this.engine.getNodeList(nodeClass).head;
+
+        return (node == null) ? null : node.entity;
     }
 
-    public function findBlock() return this.engine.getNodeList(BlockNode).head.entity;
-    public function findOre() return this.engine.getNodeList(OreNode).head.entity;
+    public function findBlock() return grabEntityFromNode(BlockNode);
+    public function findOre() return grabEntityFromNode(OreNode);
 
     /**
      *  Swap two components from one entity to another
@@ -233,7 +232,7 @@ class EntityFactory {
         return block;
     }
 
-    public function createWorker(name:String):Entity {
+    public function createWorker(?name:String):Entity {
         var base:Entity = this.engine.getEntityByName(Buildings.BASE.getName());
         var position:TilePosition = base.get(TilePosition);
         var tile:Tile = new Tile(5);
@@ -272,6 +271,23 @@ class EntityFactory {
         return ore;
     }
 
+    public function dropLoot<T>(cell:Point, lootComponent:T) {
+        var id = 0;
+        switch(Type.getClass(lootComponent)) {
+            case Ore: id = 7;
+            case ToolMining: id = 8;
+        }
+        var neighbours = [new Point(1, 0), new Point(1, -1), new Point(0, -1), new Point(-1, -1), new Point(-1, 0), new Point(-1, 1),new Point(0, 1), new Point(1, 1)];
+        var position = cell.addPoint(Util.anyOneOf(neighbours));
+        var loot:Entity = new Entity()
+        .add(new TilePosition(position.x, position.y))
+        .add(new TileImage(new Tile(id), true))
+        .add(new Loot())
+        .add(lootComponent);
+
+        this.engine.addEntity(loot);
+        return loot;
+    }
     public function getWalkingToBase():Task {
         var base:Entity = this.engine.getEntityByName(Buildings.BASE.getName());
 
