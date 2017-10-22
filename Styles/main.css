@@ -1,25 +1,34 @@
-.notification {
-    width: 265px;
+.button-row {
     text-align: right;
     color: #FFFFFF;
     height: 40px;
+    width: 228px;
 }
 
-.box {
-    width: 100%;
+.button-row.purchased {
+    color: #CCCCCC;
 }
 .dialog .dialog-contents {
+    width: 100%;
     background-color: #81887f;
 }
 
 .tabview, .tabview-contents {
-    width: 100%;
+    width: 100px;
     background-color: #91887f;
 }
-.scrollview .scrollview-contents {
-    width: 300px;
+
+.scrollview  {
+    width: 260px;
+    height: 100%;
     background-color: #a1887f;
 }
+
+.scrollview-contents {
+    width: 240px;
+    background-color: #b1887f;
+}
+
 
 image {
     width: 32px;
