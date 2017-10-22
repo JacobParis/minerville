@@ -70,8 +70,8 @@ class TileMapService {
             // Draw a diamond shaped tile pattern with walls at the edge
             var startArea = [
                 0,  2,  2,  2,  2,  2,  2,  0,
-                2,  2,  1,  1,  4,  1,  2,  2,
-                2,  1,  1,  1,  1,  1,  1,  2,
+                2,  2,  1,  1,  1,  1,  2,  2,
+                2,  1,  1,  1,  4,  1,  1,  2,
                 2,  1,  1,  1,  1,  1,  1,  2,
                 2,  7,  1,  1,  5,  1,  7,  2,
                 2,  7,  1,  1,  1,  1,  1,  2,
@@ -88,7 +88,7 @@ class TileMapService {
                 switch(TileType.createByIndex(id)) {
                     case EMPTY: continue;
                     case ORE: EntityFactory.instance.createOre(new Point(x, y), id);
-                    case WALL: EntityFactory.instance.createBlock(new Point(x, y), id, Util.anyOneOf([2,2,3,3,4,4,4,5,6,7,8,9]));
+                    case WALL: EntityFactory.instance.createBlock(new Point(x, y), id, Util.rnd(10, 30));
                     case BASE: EntityFactory.instance.createBuilding(new Point(x, y), id, Buildings.BASE);
                     case WORKER: EntityFactory.instance.createWorker("Alice");
                     default: 1;
@@ -126,7 +126,7 @@ class TileMapService {
             addBackdropTile(new Point(neighbour.x, neighbour.y), floor);
 
             var id = this.enumMap.get(TileType.WALL);
-            EntityFactory.instance.createBlock(new Point(neighbour.x, neighbour.y), id, Util.anyOneOf([2,2,3,3,4,4,4,5,6,7,8,9]));
+            EntityFactory.instance.createBlock(new Point(neighbour.x, neighbour.y), id, Util.rnd(20, 40));
         }
         
         EntityFactory.instance.destroyEntity(entity);
@@ -245,6 +245,7 @@ enum TileType {
     WORKER;
     WORKER_ORE;
     ORE;
+    PICKAXE;
 }
 
 enum Direction {
