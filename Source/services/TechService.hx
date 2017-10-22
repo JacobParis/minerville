@@ -30,7 +30,7 @@ class TechService {
     public function isTechUnlocked(name:String):Bool {
         var tech = getTechFromName(name);
         //trace("Checking if " + name +  " is unlocked.");Main.log(tech);
-        return tech.purchased;
+        return tech.purchased > 0;
     }
 
     public function getTech():Array<TechDefinition> {
@@ -41,21 +41,30 @@ class TechService {
         
     }
 
-    public function purchaseTech(tech:TechDefinition) {
+    public function purchaseTech(tech:TechDefinition):Bool {
         var index = this.tech.indexOf(tech);
-        if(index == -1) return;
+        if(index == -1) return false;
 
         var data = GameDataService.instance;
-        if(tech.price > data.gold) return;
+        if(tech.price > data.gold) return false;
 
         data.gold -= tech.price;
-        tech.purchased = true;
+        tech.purchased += 1;
         this.tech[index] = tech;
+
+        switch(tech.name) {
+            case "mine-dirt": EntityFactory.instance.createMiningTool(5);
+            case "mine-stone": EntityFactory.instance.createMiningTool(10);
+            default: 1;
+        }
+
+        return true;
     }
+
     public function getPurchasedTech():Array<TechDefinition> {
         var array:Array<TechDefinition> = new Array<TechDefinition>();
         for(tech in this.tech) {
-            if(tech.purchased) array.push(tech);
+            if(tech.purchased > 0) array.push(tech);
         }
 
         return array;
@@ -66,7 +75,7 @@ class TechService {
 
         var array:Array<TechDefinition> = new Array<TechDefinition>();
         for(tech in this.tech) {
-            if(tech.purchased) continue;
+            if(tech.purchased > 0) continue;
             if(tech.dependencies == null) {
                 array.push(tech);
                 continue;
@@ -104,7 +113,7 @@ class TechDefinition {
     public var description:String;
     public var dependencies:Array<String>;
     public var price:Int;
-
-    public var purchased:Bool = false;
+    public var unique:Bool;
+    public var purchased:Int;
     public var visible:Bool;
 }
