@@ -323,19 +323,27 @@ class AISystem extends System {
 		entity.remove(Task);
 
 		if(task.target.has(ToolMining)) {
+			if(entity.has(ToolMining)) {
+				if(task.target.get(ToolMining).strength > entity.get(ToolMining).strength) {
+					EntityFactory.instance.dropLoot(entity.get(TilePosition), entity.remove(ToolMining));
+				} else return;
+			}
+
 			entity.add(task.target.remove(ToolMining));
+			factory.destroyEntity(task.target);
 		}
 
 		if(task.target.has(Ore)) {
 			entity.add(task.target.remove(Ore));
+			factory.destroyEntity(task.target);
 
 			var returnTask:Task = factory.getWalkingToBase();
 			returnTask.estimatedTime = entity.get(Worker).estimateTaskLength(returnTask, entity.get(TilePosition).point);
 			entity.add(returnTask);
+			
 		}
 
 		Main.log(entity);
-		factory.destroyEntity(task.target);
 	}
 
 	private function completeWalk(entity:Entity, task:Task) {

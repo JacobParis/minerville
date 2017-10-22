@@ -14,6 +14,7 @@ import components.TilePosition;
 import components.Task;
 import components.TaskBid;
 import components.Worker;
+import components.ToolMining;
 
 import nodes.WorkerNode;
 import nodes.BidNode;
@@ -82,7 +83,14 @@ class TaskSystem extends System {
 					case ATTACK: threshold = node.worker.attackThreshold();
 				}
 				//trace(node.entity.name);
-				
+				// TODO handle carry limit here
+				if(task.action == Skills.CARRY) {
+					if(node.entity.has(ToolMining) && task.target.has(ToolMining)) {
+						if(node.entity.get(ToolMining).strength > task.target.get(ToolMining).strength)
+							threshold = 1;					
+					}
+				}
+
 				var base = (1.0 / task.difficulty) - threshold;
 				suitability = base + (currentTime - task.timePosted) / 10000.0;
 				if(Util.chance(suitability) || task.priority > 1) { // Currently returning values around 0.9
