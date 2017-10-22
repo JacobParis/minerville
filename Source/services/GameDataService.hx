@@ -31,10 +31,10 @@ class GameDataService {
 
     
     public function requestOre() {
-             if(Util.chance(0.5)) { this.gold += Util.anyOneOf([1,2,3,4,5]);}
-        else if(Util.chance(0.5)) { this.gold += Util.anyOneOf([11,12,13,14,15]);}
-        else if(Util.chance(0.5)) { this.gold += Util.anyOneOf([10,20,30,40,50]);}
-        else if(Util.chance(0.5)) { 
+        if(Util.chance(0.9)) { gold += Util.anyOneOf([1,2,3,4,5]);}
+        else if(Util.chance(0.9)) { gold += Util.anyOneOf([11,12,13,14,15]);}
+        else if(Util.chance(0.9)) { gold += Util.anyOneOf([10,20,30,40,50]);}
+        else if(Util.chance(0.1)) { 
             var loot =  Util.anyOneOf([100,200,300,400,500]);
             this.gold += loot;
             NotificationService.instance.addNotification(new GameEvent(EventTypes.LOOT, cast loot));
