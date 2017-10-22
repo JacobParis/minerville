@@ -10,7 +10,8 @@ class TechService {
     private var carryTech:Array<TechDefinition>;
     private var mineTech:Array<TechDefinition>;
     private var buildTech:Array<TechDefinition>;
-
+    private var tech:Array<TechDefinition>;
+    
     private function new() {}
     
     public function initialize():TechService {
@@ -18,7 +19,7 @@ class TechService {
         this.carryTech = cast json.carry;
         this.mineTech = cast json.mine;
         this.buildTech = cast json.build;
-
+        this.tech = cast json.tech;
         return this;
     }
 	
@@ -44,6 +45,59 @@ class TechService {
         return tech.purchased;
     }
 
+    public function getTech():Array<TechDefinition> {
+        return this.tech;
+    }
+
+    public function setTechToPurchased(tech:TechDefinition) {
+        var index = this.tech.indexOf(tech);
+        if(index == -1) return;
+
+        tech.purchased = true;
+        this.tech[index] = tech;
+    }
+    
+    public function getPurchasedTech():Array<TechDefinition> {
+        var array:Array<TechDefinition> = new Array<TechDefinition>();
+        for(tech in this.tech) {
+            if(tech.purchased) array.push(tech);
+        }
+
+        return array;
+    }
+
+    public function getAvailableTech():Array<TechDefinition> {
+        var purchased = getPurchasedTech();
+
+        var array:Array<TechDefinition> = new Array<TechDefinition>();
+        for(tech in this.tech) {
+            if(tech.purchased) continue;
+            if(tech.dependencies == null) {
+                array.push(tech);
+                continue;
+            }
+            if(tech.dependencies.length == 0) {
+                array.push(tech);
+                continue;
+            }
+            (function ():Bool {
+                for(dependency in tech.dependencies) {
+                    var owned = false;
+                    for(p in purchased) {
+                        if(dependency == p.name) {
+                            owned = true;
+                            break;
+                        }
+                    }
+
+                    if(owned == false) return false;
+                }
+                return true;
+            })() ? array.push(tech) : continue;
+        }
+
+        return array;
+    }
 	public function update(time:Float):Void {
         
 	}

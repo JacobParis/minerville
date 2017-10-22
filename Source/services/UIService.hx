@@ -147,20 +147,52 @@ class UIService {
 		var dialog = ComponentMacros.buildComponent("assets/ui/events.xml");
 		
 		dialog.height = 400;
-        var events = dialog.findComponent(null, ScrollView, true);
+
+        var tabView = dialog.findComponent("tabview", null, null, "css");
+
+        var eventTab:ScrollView = new ScrollView();
+        eventTab.text = "Events";
         var notifications = NotificationService.instance.getNotifications();
 
 		for(note in notifications) {
 			var button = new Button();
 			button.text = note.type.getName() + ": " + note.value;
-			button.styleNames = "notification";
-			button.height = 40;
+			button.styleNames = "button-row";
             button.onClick = function (_) {
                 NotificationService.instance.removeNotification(note);
-                events.removeComponent(button);
+                eventTab.removeComponent(button);
             };
-			events.addComponent(button);
+			eventTab.addComponent(button);
 		}
+
+        tabView.addComponent(eventTab);
+
+        var techTab:ScrollView = new ScrollView();
+        techTab.text = "Tech";
+
+
+        var technologies2 = TechService.instance.getAvailableTech();
+        for(tech in technologies2) {
+            var button = new Button();
+			button.text = tech.displayName;
+			button.styleNames = "button-row";
+            button.onClick = function (_) {
+                TechService.instance.setTechToPurchased(tech);
+                button.text = tech.displayName + "✓";
+                button.disabled = true;
+            }
+			techTab.addComponent(button);
+        }
+
+        var technologies = TechService.instance.getPurchasedTech();
+        for(tech in technologies) {
+            var button = new Button();
+			button.text = tech.displayName + "✓";
+            button.disabled = true;
+			button.styleNames = "button-row purchased";
+			techTab.addComponent(button);
+        }
+        tabView.addComponent(techTab);
 		Screen.instance.showDialog(dialog, options);
     }
 	public function update(time:Float):Void {
