@@ -78,10 +78,6 @@ class BlockSystem extends System {
 		}
 
 		for (node in engine.getNodeList(OreNode)) {
-			if(node.entity.has(Worker)) {
-				engine.getNodeList(OreNode).remove(node);
-				continue;
-			}
 			// Randomly ask to be collected
 			if(TechService.instance.isTechUnlocked("search-ore")) {
 				if(node.entity.has(Stimulus)) {

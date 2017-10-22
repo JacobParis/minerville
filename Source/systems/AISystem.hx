@@ -8,13 +8,17 @@ import ash.core.NodeList;
 import ash.core.System;
 
 import components.TilePosition;
+import components.Hardness;
 import components.Health;
+import components.Loot;
 import components.Marker;
 import components.Ore;
 import components.Path;
 import components.Stationary;
 import components.Task;
 import components.TileImage;
+import components.ToolMining;
+
 
 import components.Worker;
 
@@ -259,7 +263,9 @@ class AISystem extends System {
 				node.entity.add(new Stationary());
 				switch(node.task.action) {
 					case MINE: mineBlock(node.entity, node.task);
-					case CARRY: takeOreToBase(node.entity, node.task);
+					case CARRY: {
+						if(node.task.target.has(Loot)) collectLoot(node.entity, node.task);
+					}
 					case ATTACK: 1;
 					case WALK: completeWalk(node.entity, node.task);
 				}
@@ -268,7 +274,19 @@ class AISystem extends System {
 
 		for (node in engine.getNodeList(MiningWorkerNode)) {
 			var blockHealth:Health = node.mining.block.get(Health);
-			blockHealth.value -= node.mining.strength;
+			
+			var strength = 1;			
+			if(node.entity.has(ToolMining)) {
+				strength = node.entity.get(ToolMining).strength;
+			}
+
+			var hardness = 1;
+			if(node.mining.block.has(Hardness)) {
+				hardness = node.mining.block.get(Hardness).value;
+			}
+
+			strength = Util.max(1, strength - hardness);
+			blockHealth.value -= strength;
 
 			// TODO delegate to animation system
 			var blockTile:TileImage = node.mining.block.get(TileImage);
@@ -300,20 +318,23 @@ class AISystem extends System {
 		entity.add(new Mining(task.target));
 		entity.add(new Stationary());
 	}
-	private function takeOreToBase(entity:Entity,task:Task) {
-		//trace("takeOreToBase");
+
+	private function collectLoot(entity:Entity, task:Task) {
 		entity.remove(Task);
 
-		if(task.target.has(Ore)) {
-			var ore:Ore = task.target.remove(Ore);
+		if(task.target.has(ToolMining)) {
+			entity.add(task.target.remove(ToolMining));
+		}
 
-			entity.add(ore);
+		if(task.target.has(Ore)) {
+			entity.add(task.target.remove(Ore));
 
 			var returnTask:Task = factory.getWalkingToBase();
 			returnTask.estimatedTime = entity.get(Worker).estimateTaskLength(returnTask, entity.get(TilePosition).point);
 			entity.add(returnTask);
 		}
 
+		Main.log(entity);
 		factory.destroyEntity(task.target);
 	}
 
