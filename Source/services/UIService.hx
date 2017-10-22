@@ -50,18 +50,10 @@ class UIService {
     private var tilemap:Tilemap;
     private var data:GameDataService;
     
-    private var GOLD:Int = 0;
-    private var ORE:Int = 1;
-    private var ORE_GLOW:Int = 2;
-    private var PICKAXE:Int = 3;
-    private var PICKAXE_GLOW:Int = 4;
+    public var GOLD:Int = 0;
 
     private var goldTile:Tile;
     private var goldText:TextField;
-    private var oreTile:Tile;
-    private var oreText:TextField;
-    private var pickaxeTile:Tile;
-    private var pickaxeText:TextField;
 
     private var curtain:Sprite;
     private var curtainText:TextField;
@@ -73,6 +65,20 @@ class UIService {
     
     public function initialize(container:DisplayObjectContainer):UIService {
         this.container = container;
+
+        Assets.loadBitmapData("assets/ui.png")
+        .onComplete(function (bitmapData:BitmapData) {
+            var tileset = new Tileset(bitmapData);
+
+            GOLD = tileset.addRect(new Rectangle(0, 0, GameConfig.tileSize, GameConfig.tileSize));
+            this.tilemap = new Tilemap(container.stage.stageWidth, 60, tileset);
+            this.container.addChild(this.tilemap);
+
+            this.goldTile = new Tile(GOLD, 0, 8);
+            this.tilemap.addTile(goldTile);
+
+            goldText = addTextField(60, 12, "0");
+        });
 
         this.container.addEventListener(MouseEvent.MOUSE_UP, function(m:MouseEvent) {      
             if(this.curtain.visible) {
@@ -174,10 +180,10 @@ class UIService {
         var technologies2 = TechService.instance.getAvailableTech();
         for(tech in technologies2) {
             var button = new Button();
-			button.text = tech.displayName;
+			button.text = tech.displayName + " (" + tech.price + ")";
 			button.styleNames = "button-row";
             button.onClick = function (_) {
-                TechService.instance.setTechToPurchased(tech);
+                TechService.instance.purchaseTech(tech);
                 button.text = tech.displayName + "✓";
                 button.disabled = true;
             }
@@ -195,7 +201,21 @@ class UIService {
         tabView.addComponent(techTab);
 		Screen.instance.showDialog(dialog, options);
     }
+
 	public function update(time:Float):Void {
-       
-	}
+        var gold = GameDataService.instance.gold;
+        var newValue:String = Std.string(gold);
+        if (gold >= 1000) {
+            var suffixes = ["", "K", "M", "B","T"];
+            var suffixNum = Math.floor( Std.string(gold).length / 3 );
+            var shortValue = 0.0;
+            for (precision in [2,1]) {
+                shortValue = Math.round( (suffixNum != 0 ? (gold / Math.pow(1000,suffixNum) ) : gold) * Math.pow(10, precision) ) / Math.pow(10, precision);
+                //var dotLessShortValue = ~/[^a-zA-Z 0-9]+/g.replace(cast shortValue ,'');
+                //if (dotLessShortValue.length <= 2) { break; }
+            }
+            newValue = shortValue + suffixes[suffixNum];
+        }
+        this.goldText.text = newValue;
+    }
 }
