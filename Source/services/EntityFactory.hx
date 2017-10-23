@@ -219,13 +219,13 @@ class EntityFactory {
         return building;
     }
 
-    public function createBlock(cell:Point, id:Int, health:Int):Entity {
+    public function createBlock(cell:Point, id:Int, health:Int, hardness:Int = 1):Entity {
         var tile:Tile = new Tile(id);
         var block:Entity = new Entity()
         .add(new TilePosition(cell.x, cell.y))
         .add(new Stationary())
         .add(new TileImage(tile))
-        .add(new Hardness(1))
+        .add(new Hardness(hardness))
         .add(new Health(health));
 
         this.engine.addEntity(block);
@@ -235,7 +235,7 @@ class EntityFactory {
     public function createWorker(?name:String):Entity {
         var base:Entity = this.engine.getEntityByName(Buildings.BASE.getName());
         var position:TilePosition = base.get(TilePosition);
-        var tile:Tile = new Tile(5);
+        var tile:Tile = new Tile(6);
         var worker:Entity = new Entity(name)
         .add(new TilePosition(position.x + Util.anyOneOf([-1, 1]), position.y + Util.anyOneOf([-1, 1])))
         .add(new TileImage(tile, true))
@@ -250,7 +250,7 @@ class EntityFactory {
         var position:TilePosition = base.get(TilePosition);
         var tool:Entity = new Entity()
         .add(new TilePosition(position.x + Util.anyOneOf([-1, 1]), position.y + Util.anyOneOf([-1, 1])))
-        .add(new TileImage(new Tile(8), true))
+        .add(new TileImage(new Tile(9), true))
         .add(new Loot())
         .add(new ToolMining(strength));
 
@@ -274,11 +274,11 @@ class EntityFactory {
     public function dropLoot<T>(cell:Point, lootComponent:T) {
         var id = 0;
         switch(Type.getClass(lootComponent)) {
-            case Ore: id = 7;
-            case ToolMining: id = 8;
+            case Ore: id = 8;
+            case ToolMining: id = 9;
         }
         var neighbours = [new Point(1, 0), new Point(1, -1), new Point(0, -1), new Point(-1, -1), new Point(-1, 0), new Point(-1, 1),new Point(0, 1), new Point(1, 1)];
-        var position = cell.addPoint(Util.anyOneOf(neighbours));
+        var position = cell.clone().addPoint(Util.anyOneOf(neighbours));
         var loot:Entity = new Entity()
         .add(new TilePosition(position.x, position.y))
         .add(new TileImage(new Tile(id), true))

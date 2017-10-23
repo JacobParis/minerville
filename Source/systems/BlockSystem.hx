@@ -9,6 +9,8 @@ import ash.core.Node;
 import ash.core.NodeList;
 import ash.core.System;
 
+import components.Hardness;
+
 import components.Health;
 import components.Ore;
 import components.Task;
@@ -60,10 +62,15 @@ class BlockSystem extends System {
 		for (node in engine.getNodeList(BlockNode)) {
 			// Randomly ask to be mined
 			if(TechService.instance.isTechUnlocked("search-dirt")) {
-				if(node.entity.has(Stimulus)) {
-					TaskService.instance.addTask(new Task(Skills.MINE, node.entity), node.entity.get(Stimulus).strength);
-				} else if(Util.chance(0.5)) {
-					TaskService.instance.addTask(new Task(Skills.MINE, node.entity));
+				if(node.entity.has(Hardness)) {
+					var chance = 0.5 / node.entity.get(Hardness).value;
+
+					if(node.entity.has(Stimulus)) {
+						TaskService.instance.addTask(new Task(Skills.MINE, node.entity), node.entity.get(Stimulus).strength);
+					} else if(Util.chance(chance)) {
+						TaskService.instance.addTask(new Task(Skills.MINE, node.entity));
+					}
+
 				}
 			}
 
@@ -74,7 +81,12 @@ class BlockSystem extends System {
 			}
 
 			// TODO delegate to animation system
-			node.tile.tile.id = 2;
+			if(node.tile.tile.id == 4) {
+				if(node.entity.has(Hardness)) {
+					var hardness = node.entity.get(Hardness).value;
+					node.tile.tile.id = 1 + hardness;
+				}
+			}
 		}
 
 		for (node in engine.getNodeList(OreNode)) {
