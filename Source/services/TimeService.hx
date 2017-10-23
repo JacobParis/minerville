@@ -57,9 +57,9 @@ class TimeService {
     }
 
     private function startDay() {
-        var delta = Util.fint((this.start - this.stop)/1000);
+        var delta = Util.fint((this.start - this.stop)/10000);
         trace("Day begins at " + Util.fint(this.time) + " after a " + Util.fint(this.start - this.stop) + " unit rest");
-        UIService.instance.showCurtain("Day " + Util.fint(this.time/1000) , "(" + delta + " DAYS HAVE PASSED)");
+        UIService.instance.showCurtain("Day " + Util.fint(this.time/10000) , "(" + delta + " DAYS HAVE PASSED)");
 
         var gold = 0;
 
@@ -70,7 +70,7 @@ class TimeService {
             else if(Util.chance(0.9)) { gold += Util.anyOneOf([10,20,30,40,50]);}
             else if(Util.chance(0.1)) { gold += Util.anyOneOf([100,200,300,400,500]);}
 
-            if(Util.chance(0.1)) {
+            if(Util.chance(0.08)) {
                 var block = EntityFactory.instance.findBlock();
                 if(block != null) {
                     TileMapService.instance.destroyBlock(block);
