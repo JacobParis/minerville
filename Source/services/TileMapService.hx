@@ -68,24 +68,46 @@ class TileMapService {
             container.addChild(this.actives);
 
             // Draw a diamond shaped tile pattern with walls at the edge
-            var startArea = [
-                0,  2,  2,  2,  2,  2,  2,  0,
-                2,  2,  1,  1,  1,  1,  2,  2,
-                2,  1,  1,  1,  4,  1,  1,  2,
-                2,  1,  1,  1,  1,  1,  1,  2,
-                2,  7,  1,  1,  5,  1,  7,  2,
-                2,  7,  1,  1,  1,  1,  1,  2,
-                2,  2,  7,  1,  1,  7,  2,  2,
-                0,  2,  2,  2,  2,  2,  2,  0
-            ];
+        
+            var start = "
+              XXXXXXXX  
+            XXXXXXXXXXXX
+            XX_G____GGXX
+            XXG__@W___XX
+            X__________X
+            X__________X
+            X__________X
+            X__________X
+            XX_G____G_XX
+            XXX_G__G_XXX
+             XXXXXXXXXX ";
 
-            // Create a tile for each tile in the startArea
-            for (i in 0...startArea.length) {
-                var id = startArea[i];
-                var x = i % 8;
-                var y = Util.fint(i / 8);
+            var rowLength = 0;
+            for (i in 0...start.length) {
 
-                switch(TileType.createByIndex(id)) {
+                var tileType:TileType;
+                var c = start.charAt(i);
+                switch(c) {
+                    case " ": continue;
+                    case "\t": continue;
+                    case "\r": continue;
+                    case "\n": {
+                        if(rowLength == 0) rowLength = i - 1;
+                        continue;
+                    }
+                    case "X": tileType = TileType.WALL;
+                    case "@": tileType = TileType.BASE;
+                    case "W": tileType = TileType.WORKER;
+                    case "G": tileType = TileType.ORE;
+                    default: tileType = TileType.FLOOR;
+                }
+
+
+                var x = (rowLength == 0) ? i : i % rowLength;
+                var y = (rowLength == 0) ? 0 : Util.fint(i / rowLength);
+                var id = enumMap.get(tileType);
+
+                switch(tileType) {
                     case EMPTY: continue;
                     case ORE: EntityFactory.instance.createOre(new Point(x, y), id);
                     case WALL: EntityFactory.instance.createBlock(new Point(x, y), id, Util.rnd(10, 30));
@@ -125,8 +147,18 @@ class TileMapService {
             var floor = new Tile(this.enumMap.get(TileType.FLOOR), (neighbour.x + GameConfig.tilesLeft) * GameConfig.tileSize, (neighbour.y + GameConfig.tilesUp) * GameConfig.tileSize);
             addBackdropTile(new Point(neighbour.x, neighbour.y), floor);
 
-            var id = this.enumMap.get(TileType.WALL);
-            EntityFactory.instance.createBlock(new Point(neighbour.x, neighbour.y), id, Util.rnd(20, 40));
+            var id = 0;
+            var hardness = 1;
+            var health = 1;
+            if(Util.chance(0.6)) {
+                id = this.enumMap.get(TileType.WALL);
+                health = Util.rnd(20, 40);
+            } else {
+                id = this.enumMap.get(TileType.WALL_STONE);
+                health = Util.rnd(40, 60);
+                hardness = 2;
+            }
+            EntityFactory.instance.createBlock(new Point(neighbour.x, neighbour.y), id, health, hardness);
         }
         
         EntityFactory.instance.destroyEntity(entity);
@@ -138,6 +170,7 @@ class TileMapService {
         var ore:Entity = EntityFactory.instance.createOre(cell, this.enumMap.get(TileType.ORE));
     }
 
+    
     /**
      *  Expands the map to the bottom and right and shifts every tile 
      *  to make room if shifting to the left or up
@@ -240,6 +273,7 @@ enum TileType {
     EMPTY;
     FLOOR;
     WALL;
+    WALL_STONE;
     WALL_DAMAGED;
     BASE;
     WORKER;
