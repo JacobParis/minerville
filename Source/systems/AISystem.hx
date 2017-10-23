@@ -290,7 +290,7 @@ class AISystem extends System {
 
 			// TODO delegate to animation system
 			var blockTile:TileImage = node.mining.block.get(TileImage);
-			blockTile.id = 3;
+			blockTile.id = TileMapService.instance.enumMap.get(TileType.WALL_DAMAGED);
 
 			if(blockHealth.value > 0) continue;
 
@@ -325,7 +325,7 @@ class AISystem extends System {
 		if(task.target.has(ToolMining)) {
 			if(entity.has(ToolMining)) {
 				if(task.target.get(ToolMining).strength > entity.get(ToolMining).strength) {
-					EntityFactory.instance.dropLoot(entity.get(TilePosition), entity.remove(ToolMining));
+					EntityFactory.instance.dropLoot(entity.get(TilePosition).point, entity.remove(ToolMining));
 				} else return;
 			}
 
