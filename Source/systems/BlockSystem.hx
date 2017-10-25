@@ -18,10 +18,16 @@ import components.Task;
 import components.Worker;
 import components.Stimulus;
 import components.Marker;
+import components.TilePosition;
 import components.markers.ClickedEh;
+
+import components.GameEvent;
+
+import enums.EventTypes;
 
 import services.EntityFactory;
 import services.GameDataService;
+import services.NotificationService;
 import services.TaskService;
 import services.TechService;
 import services.TileMapService;
@@ -55,7 +61,15 @@ class BlockSystem extends System {
 	}
 	
 	override public function update(_):Void {
-
+		for ( node in engine.getNodeList(BlockNode)) {
+			// TODO delegate to animation system
+			if(node.tile.id == TileMapService.instance.enumMap.get(TileType.WALL_DAMAGED)) {
+				if(node.entity.has(Hardness)) {
+					var hardness = node.entity.get(Hardness).value - 1;
+					node.tile.id = TileMapService.instance.enumMap.get(TileType.WALL) + hardness;
+				}
+			}
+		}
 	}
 
 	public function tock(_) {
@@ -63,7 +77,8 @@ class BlockSystem extends System {
 			// Randomly ask to be mined
 			if(TechService.instance.isTechUnlocked("search-dirt")) {
 				if(node.entity.has(Hardness)) {
-					var chance = 0.5 / node.entity.get(Hardness).value;
+					// Harder rocks are exponentially less likely to be selected
+					var chance = 0.5 / node.entity.get(Hardness).value / node.entity.get(Hardness).value;
 
 					if(node.entity.has(Stimulus)) {
 						TaskService.instance.addTask(new Task(Skills.MINE, node.entity), node.entity.get(Stimulus).strength);
@@ -81,10 +96,10 @@ class BlockSystem extends System {
 			}
 
 			// TODO delegate to animation system
-			if(node.tile.tile.id == 4) {
+			if(node.tile.id == TileMapService.instance.enumMap.get(TileType.WALL_DAMAGED)) {
 				if(node.entity.has(Hardness)) {
-					var hardness = node.entity.get(Hardness).value;
-					node.tile.tile.id = 1 + hardness;
+					var hardness = node.entity.get(Hardness).value - 1;
+					node.tile.id = TileMapService.instance.enumMap.get(TileType.WALL) + hardness;
 				}
 			}
 		}
@@ -98,6 +113,24 @@ class BlockSystem extends System {
 					TaskService.instance.addTask(new Task(Skills.CARRY, node.entity), 2);
 				}
 			}
+		}
+
+		// Cave-in
+		if(Util.chance(0.01) && Util.chance(0.1)) {
+			var block = EntityFactory.instance.findBlock();
+			var cavein = "
+			----X----
+			---XXX---
+			--XXXXX--
+			---XXX---
+			----X----";
+
+			var position = block.get(TilePosition);
+
+			TileMapService.instance.loadTilePattern(cavein, position.point.clone().add(-4,-2), true);
+
+			var event = new GameEvent(EventTypes.DISASTER, "Cave-In at " + position.point);
+			NotificationService.instance.addNotification(event);
 		}
 	}
 

@@ -1,7 +1,7 @@
 package services;
 
 import components.GameEvent;
-import components.TileImage;
+import components.TilePosition;
 
 import enums.EventTypes;
 
@@ -75,6 +75,24 @@ class TimeService {
                 if(block != null) {
                     TileMapService.instance.destroyBlock(block);
                 }
+            }
+            
+            // Cave-in
+            if(Util.chance(0.01) && Util.chance(0.01)) {
+                var block = EntityFactory.instance.findBlock();
+                var cavein = "
+                ----X----
+                ---XXX---
+                --XXXXX--
+                ---XXX---
+                ----X----";
+
+                var position = block.get(TilePosition);
+
+                TileMapService.instance.loadTilePattern(cavein, position.point.clone().add(-4,-2), true);
+
+                var event = new GameEvent(EventTypes.DISASTER, "Cave-In at " + position.point);
+                NotificationService.instance.addNotification(event);
             }
         }
 
