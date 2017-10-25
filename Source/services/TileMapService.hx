@@ -36,6 +36,8 @@ class TileMapService {
     public static var instance(default, null):TileMapService = new TileMapService();
 
     private var container:DisplayObjectContainer;
+    private var factory:EntityFactory;
+
     public var enumMap:EnumValueMap<TileType, Int>;
     private var backdrops:Tilemap;
     private var actives:Tilemap;
@@ -50,6 +52,7 @@ class TileMapService {
 
     public function initialize(container:DisplayObjectContainer):TileMapService {
         this.container = container;
+        this.factory = EntityFactory.instance;
 
         Assets.loadBitmapData("assets/underground.png")
         .onComplete(function (bitmapData:BitmapData) {
@@ -66,64 +69,88 @@ class TileMapService {
             
             container.addChild(this.backdrops);
             container.addChild(this.actives);
-
-            // Draw a diamond shaped tile pattern with walls at the edge
-        
-            var start = "
-              XXXXXXXX  
-            XXXXXXXXXXXX
-            XX_G____GGXX
-            XXG__@W___XX
-            X__________X
-            X__________X
-            X__________X
-            X__________X
-            XX_G____G_XX
-            XXX_G__G_XXX
-             XXXXXXXXXX ";
-
-            var rowLength = 0;
-            for (i in 0...start.length) {
-
-                var tileType:TileType;
-                var c = start.charAt(i);
-                switch(c) {
-                    case " ": continue;
-                    case "\t": continue;
-                    case "\r": continue;
-                    case "\n": {
-                        if(rowLength == 0) rowLength = i - 1;
-                        continue;
-                    }
-                    case "X": tileType = TileType.WALL;
-                    case "@": tileType = TileType.BASE;
-                    case "W": tileType = TileType.WORKER;
-                    case "G": tileType = TileType.ORE;
-                    default: tileType = TileType.FLOOR;
-                }
-
-
-                var x = (rowLength == 0) ? i : i % rowLength;
-                var y = (rowLength == 0) ? 0 : Util.fint(i / rowLength);
-                var id = enumMap.get(tileType);
-
-                switch(tileType) {
-                    case EMPTY: continue;
-                    case ORE: EntityFactory.instance.createOre(new Point(x, y), id);
-                    case WALL: EntityFactory.instance.createBlock(new Point(x, y), id, Util.rnd(10, 30));
-                    case BASE: EntityFactory.instance.createBuilding(new Point(x, y), id, Buildings.BASE);
-                    case WORKER: EntityFactory.instance.createWorker("Alice");
-                    default: 1;
-                }
-
-                var floor = new Tile(this.enumMap.get(TileType.FLOOR), (x + GameConfig.tilesLeft) * GameConfig.tileSize, (y + GameConfig.tilesUp) * GameConfig.tileSize);
-                addBackdropTile(new Point(x, y), floor);
-            }
         });
 
+        // Draw a diamond shaped tile pattern with walls at the edge
         
+        var start = "
+        -XXXXXXXXXX-
+        -X_G____GGX-
+        XXG__@W___XX
+        X__________X
+        X__________X
+        X__________X
+        X__________X
+        XX_G____G_XX
+        -XX_G__G_XX-
+        --XXXXXXXX--";
+
+        loadTilePattern(start, new Point(-5,-2));
         
         return this;
+    }
+
+    public function loadTilePattern(pattern:String, topright:Point, overwrite:Bool = false) {
+        var stripNewlines = (~/\n/g).replace(pattern, "¬");
+        var filteredPattern = (~/\s/g).replace(stripNewlines, "");
+        var rowLength = 0;
+        for (i in 0...filteredPattern.length) {
+            var x = (rowLength == 0) ? i : i % rowLength;
+            var y = (rowLength == 0) ? 0 : Util.fint(i / rowLength);
+            var position = new Point(topright.x + x - 1, topright.y + y);
+            
+
+            var tileType:TileType;
+            switch(filteredPattern.charAt(i)) {
+                case " ": continue;
+                case "-": continue;
+                case "¬": {
+                    trace(rowLength, i);
+                    if(rowLength == 0) rowLength = i;
+                    continue;
+                }
+                case "X": tileType = TileType.WALL;
+                case "@": tileType = TileType.BASE;
+                case "W": tileType = TileType.WORKER;
+                case "G": tileType = TileType.ORE;
+                default: tileType = TileType.FLOOR;
+            }
+
+            // If we want to only fill in blank tiles
+            // Overwrite = false + Clip = false
+            if(!overwrite && tileType != TileType.ORE && positionMap.get(position) != null) continue;
+
+            // If we want to only fill in solid tiles
+            // Overwrite = true + Clip = True
+            if(overwrite && positionMap.get(position) == null) continue;
+            
+            var id = enumMap.get(tileType);
+
+            var floor = new Tile(this.enumMap.get(TileType.FLOOR), (position.x + GameConfig.tilesLeft) * GameConfig.tileSize, (position.y + GameConfig.tilesUp) * GameConfig.tileSize);
+            addBackdropTile(position, floor);
+            
+            switch(tileType) {
+                case ORE: this.factory.createOre(position, id);
+                case WALL: {
+                    trace("WALL", position);
+                    var id = 0;
+                    var hardness = 1;
+                    var health = 1;
+                    if(Util.chance(0.8)) {
+                        id = this.enumMap.get(TileType.WALL);
+                        health = Util.rnd(20, 30);
+                    } else {
+                        id = this.enumMap.get(TileType.WALL_STONE);
+                        health = Util.rnd(40, 60);
+                        hardness = 2;
+                    }
+                    this.factory.createBlock(position, id, health, hardness);
+                }
+                case BASE: this.factory.createBuilding(position, id, Buildings.BASE);
+                case WORKER: this.factory.createWorker();
+                default: 1;
+            }
+        }
     }
 
     /**
@@ -137,37 +164,12 @@ class TileMapService {
         .divide(GameConfig.tileSize)
         .add(-GameConfig.tilesLeft, -GameConfig.tilesUp);
 
-        var neighbours = [new Point(1, 0), new Point(1, -1), new Point(0, -1), new Point(-1, -1), new Point(-1, 0), new Point(-1, 1),new Point(0, 1), new Point(1, 1)];
-        for(neighbour in neighbours) {
-            neighbour.add(cell.x, cell.y);
+        this.factory.destroyEntity(entity);
 
-            var neighbourTile = positionMap.get(neighbour);
-            if (neighbourTile != null) continue; //There is already a tile here
-
-            var floor = new Tile(this.enumMap.get(TileType.FLOOR), (neighbour.x + GameConfig.tilesLeft) * GameConfig.tileSize, (neighbour.y + GameConfig.tilesUp) * GameConfig.tileSize);
-            addBackdropTile(new Point(neighbour.x, neighbour.y), floor);
-
-            var id = 0;
-            var hardness = 1;
-            var health = 1;
-            if(Util.chance(0.6)) {
-                id = this.enumMap.get(TileType.WALL);
-                health = Util.rnd(20, 40);
-            } else {
-                id = this.enumMap.get(TileType.WALL_STONE);
-                health = Util.rnd(40, 60);
-                hardness = 2;
-            }
-            EntityFactory.instance.createBlock(new Point(neighbour.x, neighbour.y), id, health, hardness);
-        }
-        
-        EntityFactory.instance.destroyEntity(entity);
-
-        var floor = new Tile(this.enumMap.get(TileType.FLOOR), tile.x, tile.y);
-        addBackdropTile(new Point(cell.x, cell.y), floor);
-
-        // TODO this should not be here
-        var ore:Entity = EntityFactory.instance.createOre(cell, this.enumMap.get(TileType.ORE));
+        loadTilePattern("
+        XXX
+        XGX
+        XXX", cell.add(-1,-1));
     }
 
     
@@ -258,8 +260,7 @@ class TileMapService {
 		var surroundings:RelativeArray2D<Null<Bool>> = new RelativeArray2D<Null<Bool>>(size, size, new Point(distance,distance), false);
 		for(i in 0...surroundings.size) {
 			var cell = surroundings.fromIndex(i);
-			var block = EntityFactory.instance.stationaryAt(position.x + cell.x - distance, position.y + cell.y - distance) != null;
-			//var worker = EntityFactory.instance.stationaryAt(position.x + cell.x - 2, position.y + cell.y - 2) != null;
+			var block = this.factory.stationaryAt(position.x + cell.x - distance, position.y + cell.y - distance) != null;
 			surroundings.setIndex(i, block);
 		}
 		//trace(surroundings);
