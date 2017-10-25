@@ -174,35 +174,16 @@ class AISystem extends System {
 		return target;
 	}
 
-	private function dropTask(entity:Entity, task:Task) {
-		//trace(entity.name + " has dropped task " + task.action.getName());
-		//trace("    Expected duration: " + task.estimatedTime);
-		//trace("    Actual time: " + task.timeTaken);
-
-		// Estimate a little more time next time
-		if(entity.has(Worker)) {
-			entity.get(Worker).tweakEstimations(task.timeTaken - task.estimatedTime);
-		}
-		//node.worker.detrain(node.task.action);
-		if(entity.has(Ore)) {
-			var ore = entity.remove(Ore);
-			if(entity.has(TilePosition)) {
-				// TODO check for surroundings
-				//var adjacentPoint = entity.get(Position).point.clone().add(Util.anyOneOf([-1, 0, 1]), Util.anyOneOf([-1, 1]));
-				//factory.createOre(adjacentPoint, ore.id);
-			}
-		}
-		entity.remove(Task);	
-	}
 	public function tock(time:Float):Void {
 		
 		for (node in engine.getNodeList(TaskWorkerNode)) {
-			var debug = node.entity.has(Marker);
+			var isSelected = node.entity.has(Marker);
 			
 			// Drop task if it takes longer than expected
-			if(node.task.timeTaken++ > node.task.estimatedTime) {
-				
-				dropTask(node.entity, node.task);
+			node.task.timeTaken += 1;
+
+			if(!isSelected && node.task.timeTaken > node.task.estimatedTime * 1.5) {
+				factory.dropTask(node.entity);
 				continue;
 			}
 
@@ -214,11 +195,13 @@ class AISystem extends System {
 				// Remove stationary component if present
 				// Marked Entities should always be stationary
 				// This stops other workers from bumping them out of the way
-				if(node.entity.has(Stationary) && !node.entity.has(Marker)) {
+				if(node.entity.has(Stationary) && !isSelected) {
 					node.entity.remove(Stationary);
 				}
 
-				var area = map.lookAround(position.point, 6);
+				var vision = isSelected ? 30 : 6;
+
+				var area = map.lookAround(position.point, vision);
 				var target = position.point.clone();
 
 				if(node.entity.has(Path)) {
@@ -230,18 +213,23 @@ class AISystem extends System {
 						target = path.origin.clone().addPoint(point);
 					}
 				} else {
-					target = movePosition(position.point, destination, area);
+					// If we haven't selected the worker, move randomly toward the destination
+					if(!isSelected)	target = movePosition(position.point, destination, area);
 				
-					if(target.x == position.point.x
-					&& target.y == position.point.y) {
-						if(debug) {
-							trace(node.entity.name + " did not move. Generating path...");
+					// If we have selected the worker, or we tried to move and got nowhere
+					// Generate a path toward the destination
+					if(isSelected
+					|| (target.x == position.point.x
+					&& target.y == position.point.y)) {
+						if(isSelected) {
+							//trace(node.entity.name + " did not move. Generating path...");
 						}
 						//trace("		did not move this time.");
 						// We didn't move, try again'
-						var path = generatePath(position.point, destination, area, debug);
+						var path = generatePath(position.point, destination, area, isSelected);
 						if(path == null) {
-							dropTask(node.entity, node.task);
+							if(isSelected) trace(node.entity.name + " failed to reach the task target.");
+							factory.dropTask(node.entity);
 							continue;
 						} else {
 							node.entity.add(path);
@@ -260,6 +248,7 @@ class AISystem extends System {
 				position.point = target;
 			} else {
 				// We have arrived at our destination
+				if(isSelected) trace(node.entity.name + " has reached their destination.");
 				node.entity.add(new Stationary());
 				switch(node.task.action) {
 					case MINE: mineBlock(node.entity, node.task);
@@ -277,12 +266,14 @@ class AISystem extends System {
 			
 			var strength = 1;			
 			if(node.entity.has(ToolMining)) {
-				strength = node.entity.get(ToolMining).strength;
+				var toolMining:ToolMining = node.entity.get(ToolMining);
+				strength = toolMining.strength;
 			}
 
 			var hardness = 1;
 			if(node.mining.block.has(Hardness)) {
-				hardness = node.mining.block.get(Hardness).value;
+				var hardnessComponent = node.mining.block.get(Hardness);
+				hardness = hardnessComponent.value;
 			}
 
 			strength = Util.max(1, strength - hardness);
@@ -290,11 +281,11 @@ class AISystem extends System {
 
 			// TODO delegate to animation system
 			var blockTile:TileImage = node.mining.block.get(TileImage);
-			blockTile.id = TileMapService.instance.enumMap.get(TileType.WALL_DAMAGED);
+			blockTile.id = map.enumMap.get(TileType.WALL_DAMAGED);
 
-			if(blockHealth.value > 0) continue;
-
-			node.entity.remove(Mining);
+			
+			// Stop beating a dead quartz
+			if(blockHealth.value == 0) node.entity.remove(Mining);
 		}
 
 		// TODO move to different system
@@ -321,11 +312,12 @@ class AISystem extends System {
 
 	private function collectLoot(entity:Entity, task:Task) {
 		entity.remove(Task);
+		if(entity.has(Marker)) trace(entity.name + " is picking up....");
 
 		if(task.target.has(ToolMining)) {
 			if(entity.has(ToolMining)) {
 				if(task.target.get(ToolMining).strength > entity.get(ToolMining).strength) {
-					EntityFactory.instance.dropLoot(entity.get(TilePosition).point, entity.remove(ToolMining));
+					this.factory.dropLoot(entity.get(TilePosition).point, entity.remove(ToolMining));
 				} else return;
 			}
 
@@ -334,6 +326,7 @@ class AISystem extends System {
 		}
 
 		if(task.target.has(Ore)) {
+			if(entity.has(Marker)) trace("... some ore!");
 			entity.add(task.target.remove(Ore));
 			factory.destroyEntity(task.target);
 
@@ -348,8 +341,10 @@ class AISystem extends System {
 
 	private function completeWalk(entity:Entity, task:Task) {
 		//trace("completeWalk");
+		if(entity.has(Marker)) trace(entity.name + " has arrived at the Base");
 		if(task.target.name == Buildings.BASE.getName()) {
 			if(entity.has(Ore)) {
+				if(entity.has(Marker)) trace(entity.name + " has dropped off Ore");
 				entity.remove(Ore);
 				var worker:Worker = entity.get(Worker);
 				worker.train(Skills.CARRY, entity.name);

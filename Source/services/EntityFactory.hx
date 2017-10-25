@@ -22,6 +22,7 @@ import components.Health;
 import components.Loot;
 import components.Marker;
 import components.Ore;
+import components.Path;
 import components.Position;
 import components.Stationary;
 import components.Stimulus;
@@ -34,6 +35,7 @@ import components.Worker;
 
 
 import components.ai.Walking;
+import components.ai.Mining;
 
 import components.markers.ClickedEh;
 
@@ -159,10 +161,20 @@ class EntityFactory {
         return null;
     }
 
-    private function grabEntityFromNode<TNode:Node<TNode>>(nodeClass:Class<TNode>) {
-        var node = this.engine.getNodeList(nodeClass).head;
+    private function grabEntityFromNode<TNode:Node<TNode>>(nodeClass:Class<TNode>):Null<Entity> {
+        for(node in this.engine.getNodeList(nodeClass)) {
+            if(Util.chance(0.95)) continue;
 
-        return (node == null) ? null : node.entity;
+            return node.entity;
+        }
+
+        for(node in this.engine.getNodeList(nodeClass)) {
+            if(Util.chance(0.25)) continue;
+
+            return node.entity;
+        }
+
+        return null;
     }
 
     public function findBlock() return grabEntityFromNode(BlockNode);
@@ -208,7 +220,7 @@ class EntityFactory {
     }
 
     public function createBuilding(cell:Point, id:Int, name:Buildings):Entity {
-        var tile:Tile = new Tile(id);
+        var tile:Tile = new Tile(TileMapService.instance.enumMap.get(TileType.BASE));
         var building:Entity = new Entity(name.getName())
         .add(new TilePosition(cell.x, cell.y))
         .add(new TileImage(tile, true))
@@ -234,10 +246,21 @@ class EntityFactory {
 
     public function createWorker(?name:String):Entity {
         var base:Entity = this.engine.getEntityByName(Buildings.BASE.getName());
-        var position:TilePosition = base.get(TilePosition);
-        var tile:Tile = new Tile(6);
+        var tile:Tile = new Tile(TileMapService.instance.enumMap.get(TileType.WORKER));
+
+        // Choose a random safe tile surrounding the base
+        var neighbours = [new Point(1, 0), new Point(1, -1), new Point(0, -1), new Point(-1, -1), new Point(-1, 0), new Point(-1, 1),new Point(0, 1), new Point(1, 1)];
+        var position = null;
+        while(true) {
+            position = base.get(TilePosition).point.clone().addPoint(Util.anyOneOf(neighbours));
+            if(stationaryAt(position.x, position.y) == null) break;
+        }
+
+        // Choose a random name unless one is specified
+        if(name == null) name = randomName();
+
         var worker:Entity = new Entity(name)
-        .add(new TilePosition(position.x + Util.anyOneOf([-1, 1]), position.y + Util.anyOneOf([-1, 1])))
+        .add(new TilePosition(position.x, position.y))
         .add(new TileImage(tile, true))
         .add(new Worker());
         
@@ -259,7 +282,7 @@ class EntityFactory {
     }
 
     public function createOre(cell:Point, id:Int):Entity {
-        var tile:Tile = new Tile(id);
+        var tile:Tile = new Tile(TileMapService.instance.enumMap.get(TileType.ORE));
         var ore:Entity = new Entity()
         .add(new TilePosition(cell.x, cell.y))
         .add(new Stationary())
@@ -277,8 +300,13 @@ class EntityFactory {
             case Ore: id = 8;
             case ToolMining: id = 9;
         }
+
         var neighbours = [new Point(1, 0), new Point(1, -1), new Point(0, -1), new Point(-1, -1), new Point(-1, 0), new Point(-1, 1),new Point(0, 1), new Point(1, 1)];
-        var position = cell.clone().addPoint(Util.anyOneOf(neighbours));
+        var position = null;
+        while(true) {
+            position = cell.clone().addPoint(Util.anyOneOf(neighbours));
+            if(stationaryAt(position.x, position.y) == null) break;
+        }
         var loot:Entity = new Entity()
         .add(new TilePosition(position.x, position.y))
         .add(new TileImage(new Tile(id), true))
@@ -288,10 +316,149 @@ class EntityFactory {
         this.engine.addEntity(loot);
         return loot;
     }
+
+    public function dropTask(entity:Entity) {
+		//trace(entity.name + " has dropped task " + task.action.getName());
+		//trace("    Expected duration: " + task.estimatedTime);
+		//trace("    Actual time: " + task.timeTaken);
+        if(!entity.has(Task)) return;
+
+        Main.log(entity.components);
+        var task = entity.get(Task);
+		entity.remove(Task);	
+
+		if(entity.has(Mining)) entity.remove(Mining);
+        if(entity.has(Walking)) entity.remove(Walking);
+        if(entity.has(Path)) entity.remove(Path);
+		// Estimate a little more time next time
+		if(entity.has(Worker)) {
+			entity.get(Worker).tweakEstimations(task.timeTaken - task.estimatedTime);
+		}
+		//node.worker.detrain(node.task.action);
+		if(entity.has(Ore) && entity.has(TilePosition)) {
+			var position = entity.get(TilePosition);
+			dropLoot(position.point, entity.remove(Ore));
+		}
+	}
     public function getWalkingToBase():Task {
         var base:Entity = this.engine.getEntityByName(Buildings.BASE.getName());
 
         return new Task(Skills.WALK, base);
+    }
+
+    private function randomName():String {
+        if(Util.chance(0.8)) return Util.anyOneOf(dwarfNames());
+        else return Util.anyOneOf(catNames());
+    }
+
+    private function dwarfNames():Array<String> {
+        return [
+            "Balin",
+            "Bashful",
+            "Bifur",
+            "Bob",
+            "Bofur",
+            "Bombur",
+            "Doc",
+            "Dopey",
+            "Dori",
+            "Durin",
+            "Dwalin",
+            "Fili",
+            "Frerin",
+            "Futhark",
+            "Gannel",
+            "Gimli",
+            "Gloin",
+            "Grumpy",
+            "Hadhod",
+            "Happy",
+            "Hlordis",
+            "Hrothgar",
+            "Hruthmund",
+            "Kili",
+            "Korgun",
+            "Nain",
+            "Navi",
+            "Nori",
+            "Odgar",
+            "Oin",
+            "Ori",
+            "Orik",
+            "Sleepy",
+            "Sneezy",
+            "Telchar",
+            "Thane",
+            "Thorin",
+            "Thror",
+            "Urist"
+        ];
+    }
+
+    private function catNames():Array<String> {
+        return [
+            "Bagheera",
+            "Biscuit",
+            "Buster",
+            "Buttons",
+            "Champ",
+            "Chester",
+            "Chubbs",
+            "Coco",
+            "Coolio",
+            "Danger",
+            "Dumpling",
+            "Fez",
+            "French Fry",
+            "Goober",
+            "Goofball",
+            "Honey",
+            "Juliet",
+            "Kit Kit",
+            "Kringer",
+            "Lucky",
+            "MC Catnip",
+            "Magic",
+            "Max",
+            "Ming",
+            "Mozart",
+            "Mr Fluffers",
+            "Mr Purrfect",
+            "Munchie",
+            "Napoleon",
+            "Nibbles",
+            "Ninja",
+            "Oscar",
+            "Paco",
+            "Pancake",
+            "Peaches",
+            "Pixel",
+            "Princess",
+            "Rascal",
+            "Rex",
+            "Romeo",
+            "Sam",
+            "Scratches",
+            "Smedley",
+            "Smiley",
+            "Snaps",
+            "Snickers",
+            "Sniffy",
+            "Snowball",
+            "Snuggles",
+            "Sprinkles",
+            "Stone Cold",
+            "Sugar Buns",
+            "Sunshine",
+            "Thunder",
+            "Tiny",
+            "Tweek",
+            "Twinkle",
+            "Whiskers",
+            "Wiggles",
+            "Wink",
+            "Zippy"
+        ];
     }
 }
 

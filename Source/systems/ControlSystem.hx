@@ -9,6 +9,7 @@ import components.markers.ClickedEh;
 import components.Marker;
 import components.Stationary;
 import components.Task;
+import components.TileImage;
 import components.TilePosition;
 import components.Worker;
 
@@ -19,7 +20,9 @@ import nodes.WorkerNode;
 import nodes.BlockNode;
 import nodes.OreNode;
 
+import services.EntityFactory;
 import services.TaskService;
+import services.TileMapService;
 
 
 class ControlSystem extends System {
@@ -56,37 +59,28 @@ class ControlSystem extends System {
 			this.markedEntity = node.entity;
 
 			// Remove any current tasks
-			if(this.markedEntity.has(Task))
-				this.markedEntity.remove(Task);
-
-			if(this.markedEntity.has(Mining))
-				this.markedEntity.remove(Mining);
-
-			if(this.markedEntity.has(Walking))
-				this.markedEntity.remove(Walking);
-
+			EntityFactory.instance.dropTask(this.markedEntity);
+			
 			if(!this.markedEntity.has(Stationary))
 				this.markedEntity.add(new Stationary());
 		}
 
 		for (node in engine.getNodeList(BlockNode)) {
-			
-
 			// Handle click
 			if(!node.entity.has(ClickedEh)) 
 				continue;
 
 			node.entity.remove(ClickedEh);
+			trace("Clicked on block!");
+			
 
 			var task = new Task(Skills.MINE, node.entity);
 			if(this.markedEntity == null) {
 				// Send to Task Allocator
 				TaskService.instance.addTask(task, 10);
-			} else {
-				// Assign directly to worker
-				task.estimatedTime = this.markedEntity.get(Worker).estimateTaskLength(task, this.markedEntity.get(TilePosition).point);
-				this.markedEntity.add(task);
-			}	
+			} else assignTask(this.markedEntity, task);
+
+
 		}
 
 		for (node in engine.getNodeList(OreNode)) {
@@ -96,19 +90,25 @@ class ControlSystem extends System {
 
 			node.entity.remove(ClickedEh);
 
+			trace("Clicked on ore!");
 			var task = new Task(Skills.CARRY, node.entity);
 			if(this.markedEntity == null) {
 				// Send to Task Allocator
 				TaskService.instance.addTask(task, 10);
-			} else {
-				// Assign directly to worker
-				task.estimatedTime = this.markedEntity.get(Worker).estimateTaskLength(task, this.markedEntity.get(TilePosition).point);
-				this.markedEntity.add(task);
-			}	
+			} else assignTask(this.markedEntity, task);
 		}
 	}
 	
-	
+	private function assignTask(entity:Entity, task:Task) {
+		// Assign directly to worker
+			if(entity.has(Task)) EntityFactory.instance.dropTask(entity);
+
+			var position:TilePosition = entity.get(TilePosition);
+			var worker:Worker = entity.get(Worker);
+			task.estimatedTime = worker.estimateTaskLength(task, position.point);
+			entity.add(task);
+	}
+
 	public function tock(_):Void {
 		// REMEMBER TO REGISTER THIS TICKER
 
