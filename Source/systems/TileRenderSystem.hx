@@ -9,6 +9,7 @@ import ash.core.NodeList;
 import ash.core.System;
 
 import components.TileImage;
+import components.SmoothMovement;
 
 import nodes.TileNode;
 
@@ -25,10 +26,15 @@ class TileRenderSystem extends System {
 	private var container:DisplayObjectContainer;
 	private var map:TileMapService;
 
+    private var oldLeft:Int;
+    private var oldUp:Int;
+
     public function new(container:DisplayObjectContainer) {
         super();
         this.container = container;
 		this.map = TileMapService.instance;
+        this.oldLeft = GameConfig.tilesLeft;
+        this.oldUp = GameConfig.tilesUp;
     }
 
     override public function addToEngine(engine:Engine):Void {
@@ -58,9 +64,22 @@ class TileRenderSystem extends System {
     }
 
     override public function update(time:Float):Void {
+        var originChanged = (this.oldLeft != GameConfig.tilesLeft) || (this.oldUp != GameConfig.tilesUp);
         for (node in this.nodes) {
-            node.tile.x = (node.position.x + GameConfig.tilesLeft) * GameConfig.tileSize;
-            node.tile.y = (node.position.y + GameConfig.tilesUp) * GameConfig.tileSize;
+            
+            if(node.entity.has(SmoothMovement) && !originChanged) {
+                var targetX = (node.position.x + GameConfig.tilesLeft) * GameConfig.tileSize;
+                var targetY = (node.position.y + GameConfig.tilesUp) * GameConfig.tileSize;
+                node.tile.x = node.tile.tile.x + Math.min(Math.max((targetX - node.tile.tile.x), -16), 16);
+                node.tile.y = node.tile.tile.y + Math.min(Math.max((targetY - node.tile.tile.y), -16), 16);
+            } else {
+                node.tile.x = (node.position.x + GameConfig.tilesLeft) * GameConfig.tileSize;
+                node.tile.y = (node.position.y + GameConfig.tilesUp) * GameConfig.tileSize;
+                if(originChanged) {
+                    this.oldLeft = GameConfig.tilesLeft;
+                    this.oldUp = GameConfig.tilesUp;
+                }
+            }
         }
     }
 

@@ -44,6 +44,7 @@ class ControlSystem extends System {
 			if(!node.entity.has(ClickedEh)) 
 				continue;
 
+			Main.log(node.entity.components);
 			node.entity.remove(ClickedEh);
 
 			if(this.markedEntity != null && this.markedEntity.has(Marker))
@@ -60,7 +61,7 @@ class ControlSystem extends System {
 
 			// Remove any current tasks
 			EntityFactory.instance.dropTask(this.markedEntity);
-			
+
 			if(!this.markedEntity.has(Stationary))
 				this.markedEntity.add(new Stationary());
 		}

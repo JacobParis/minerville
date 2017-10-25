@@ -26,6 +26,7 @@ import components.Path;
 import components.Position;
 import components.Stationary;
 import components.Stimulus;
+import components.SmoothMovement;
 import components.Task;
 import components.TileImage;
 import components.TilePosition;
@@ -262,6 +263,7 @@ class EntityFactory {
         var worker:Entity = new Entity(name)
         .add(new TilePosition(position.x, position.y))
         .add(new TileImage(tile, true))
+        .add(new SmoothMovement())
         .add(new Worker());
         
         this.engine.addEntity(worker);
@@ -321,17 +323,19 @@ class EntityFactory {
 		//trace(entity.name + " has dropped task " + task.action.getName());
 		//trace("    Expected duration: " + task.estimatedTime);
 		//trace("    Actual time: " + task.timeTaken);
-        if(!entity.has(Task)) return;
 
         Main.log(entity.components);
-        var task = entity.get(Task);
-		entity.remove(Task);	
 
 		if(entity.has(Mining)) entity.remove(Mining);
         if(entity.has(Walking)) entity.remove(Walking);
         if(entity.has(Path)) entity.remove(Path);
 		// Estimate a little more time next time
-		if(entity.has(Worker)) {
+
+        if(!entity.has(Task)) return;
+        var task = entity.get(Task);
+		entity.remove(Task);	
+		
+        if(entity.has(Worker)) {
 			entity.get(Worker).tweakEstimations(task.timeTaken - task.estimatedTime);
 		}
 		//node.worker.detrain(node.task.action);

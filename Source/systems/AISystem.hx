@@ -191,7 +191,7 @@ class AISystem extends System {
 			var position:TilePosition = node.position;
 			// Travel to task
 			if(Point.distance(position.point, destination) > 1) {
-				
+				if(isSelected) trace("yes");
 				// Remove stationary component if present
 				// Marked Entities should always be stationary
 				// This stops other workers from bumping them out of the way
@@ -285,7 +285,7 @@ class AISystem extends System {
 
 			
 			// Stop beating a dead quartz
-			if(blockHealth.value == 0) node.entity.remove(Mining);
+			if(blockHealth.value == 0) factory.dropTask(node.entity);
 		}
 
 		// TODO move to different system
@@ -305,7 +305,13 @@ class AISystem extends System {
 	private function mineBlock(entity:Entity,task:Task) {
 		//trace("mineBlock");
 		entity.remove(Task);
-		entity.get(Worker).train(Skills.MINE, entity.name);
+
+		if(entity.has(Mining)) entity.remove(Mining);
+        if(entity.has(Path)) entity.remove(Path);
+
+		var worker:Worker = entity.get(Worker);
+		worker.train(Skills.MINE, entity.name);
+
 		entity.add(new Mining(task.target));
 		entity.add(new Stationary());
 	}
