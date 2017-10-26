@@ -180,7 +180,7 @@ class UIService {
         var technologies2 = TechService.instance.getAvailableTech();
         for(tech in technologies2) {
             var button = new Button();
-			button.text = tech.displayName + " (Buy for " + tech.price + "g)";
+			button.text = tech.displayName + " " + tech.price + "g";
 			button.styleNames = "button-row";
             button.onClick = function (_) {
                 if(!TechService.instance.purchaseTech(tech)) return;
@@ -188,7 +188,7 @@ class UIService {
                     button.text = tech.displayName + "✓";
                     button.disabled = true;
                 } else {
-                    button.text = tech.displayName + " (" + tech.purchased++ + ")" ;
+                    button.text = tech.displayName + " " + tech.price + "g" + " (" + tech.purchased + ")" ;
                 }
             }
 
@@ -204,14 +204,14 @@ class UIService {
                 button.text = tech.displayName + "✓";
                 button.disabled = true;
             } else {
-                button.text = tech.displayName + " (" + tech.purchased + ")" ;
+                button.text = tech.displayName + " " + tech.price + "g" + " (" + tech.purchased + ")" ;
                 button.onClick = function (_) {
                     if(!TechService.instance.purchaseTech(tech)) return;
                     if(tech.unique) {
                         button.text = tech.displayName + "✓";
                         button.disabled = true;
                     } else {
-                        button.text = tech.displayName + " (" + tech.purchased + ")" ;
+                        button.text = tech.displayName + " " + tech.price + "g" + " (" + tech.purchased + ")" ;
                     }
                 }
             }
