@@ -310,10 +310,12 @@ class EntityFactory {
             position = cell.clone().addPoint(Util.anyOneOf(neighbours));
             if(stationaryAt(position.x, position.y) == null) break;
         }
+    
         var loot:Entity = new Entity()
         .add(new TilePosition(position.x, position.y))
         .add(new TileImage(new Tile(id), true))
         .add(new Loot())
+        .add(new Stationary())
         .add(new Expiry(100))
         .add(lootComponent);
 
