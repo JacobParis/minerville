@@ -7,7 +7,7 @@ import components.Ore;
 import components.TilePosition;
 import components.TileImage;
 
-class OreNode extends Node<OreNode> {
+class LootNode extends Node<LootNode> {
     public var position:TilePosition;
     public var tile:TileImage;
     public var loot:Loot;

@@ -15,6 +15,7 @@ import ash.tools.ComponentPool;
 import interfaces.InputListener;
 
 import components.Building;
+import components.Expiry;
 import components.GameEvent;
 import components.GameState;
 import components.Hardness;
@@ -43,7 +44,7 @@ import components.markers.ClickedEh;
 import enums.EventTypes;
 import nodes.WorkerNode;
 import nodes.BlockNode;
-import nodes.OreNode;
+import nodes.LootNode;
 import nodes.TileNode;
 import nodes.StationaryObjectNode;
 
@@ -179,7 +180,7 @@ class EntityFactory {
     }
 
     public function findBlock() return grabEntityFromNode(BlockNode);
-    public function findOre() return grabEntityFromNode(OreNode);
+    public function findOre() return grabEntityFromNode(LootNode);
 
     /**
      *  Swap two components from one entity to another
@@ -313,6 +314,7 @@ class EntityFactory {
         .add(new TilePosition(position.x, position.y))
         .add(new TileImage(new Tile(id), true))
         .add(new Loot())
+        .add(new Expiry(100))
         .add(lootComponent);
 
         this.engine.addEntity(loot);

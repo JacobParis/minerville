@@ -27,6 +27,7 @@ import systems.AISystem;
 import systems.BlockSystem;
 import systems.ControlSystem;
 import systems.EventSystem;
+import systems.LootSystem;
 import systems.RenderSystem;
 import systems.TaskSystem;
 import systems.TileRenderSystem;
@@ -75,6 +76,9 @@ class Game {
         var tockSystem = new TockSystem();
         addSystem(tockSystem);
 
+        var lootSystem = new LootSystem();
+        addSystem(lootSystem);
+
         var taskSystem = new TaskSystem();
         addSystem(taskSystem);
 
@@ -108,6 +112,7 @@ class Game {
         tockProvider = new FixedTickProvider(gameLayer, 0.2);
         tockProvider.add(controlSystem.tock);
         tockProvider.add(tockSystem.tock);
+        tockProvider.add(lootSystem.tock);
         tockProvider.add(blockSystem.tock);
         tockProvider.add(taskSystem.tock);
         tockProvider.add(aiSystem.tock);

@@ -34,7 +34,7 @@ import services.TileMapService;
 
 import nodes.BlockNode;
 import nodes.MarkerNode;
-import nodes.OreNode;
+import nodes.LootNode;
 import nodes.WorkerNode;
 
 import util.Util;
@@ -104,7 +104,7 @@ class BlockSystem extends System {
 			}
 		}
 
-		for (node in engine.getNodeList(OreNode)) {
+		for (node in engine.getNodeList(LootNode)) {
 			// Randomly ask to be collected
 			if(TechService.instance.isTechUnlocked("search-ore")) {
 				if(node.entity.has(Stimulus)) {

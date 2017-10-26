@@ -18,7 +18,7 @@ import components.ai.Walking;
 
 import nodes.WorkerNode;
 import nodes.BlockNode;
-import nodes.OreNode;
+import nodes.LootNode;
 
 import services.EntityFactory;
 import services.TaskService;
@@ -84,7 +84,7 @@ class ControlSystem extends System {
 
 		}
 
-		for (node in engine.getNodeList(OreNode)) {
+		for (node in engine.getNodeList(LootNode)) {
 			// Handle click
 			if(!node.entity.has(ClickedEh)) 
 				continue;
