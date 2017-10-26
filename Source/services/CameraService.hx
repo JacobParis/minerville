@@ -33,6 +33,9 @@ class CameraService implements InputListener {
     private var mouseY:Float;
 
     public var isScrolling = false;
+
+    private var shakeTime:Int = 0;
+    private var shakeIntensity = 60;
     private function new() {
     }
     
@@ -68,6 +71,7 @@ class CameraService implements InputListener {
         this.startY = -this.container.y;
 
         this.isMouseDown = true;
+
     }
 
     public function mouseUp() {
@@ -142,6 +146,12 @@ class CameraService implements InputListener {
         this.container.transform.matrix = matrix;
     }
 
+    public function cameraShake() {
+        var intensity = this.shakeTime - (Math.pow(this.shakeTime, 2) / this.shakeIntensity);
+
+        this.container.x += 2 * Math.random() * intensity - intensity;
+        this.container.y += 2 * Math.random() * intensity - intensity;
+    }
     public function update(time:Float):Void {
         if(isMouseDown) {
             if(!this.isScrolling) {
@@ -156,7 +166,18 @@ class CameraService implements InputListener {
             this.container.x = (this.container.x - this.targetX) / 2.0;
             this.container.y = (this.container.y - this.targetY) / 2.0;
         }
+
+        if(this.shakeTime > 0) {
+            this.shakeTime -= 1;
+
+            cameraShake();
+        }
         
         
+    }
+
+    public function triggerShake(?newIntensity:Int) {
+        if(newIntensity != null) this.shakeIntensity = newIntensity;
+        shakeTime = this.shakeIntensity;
     }
 }

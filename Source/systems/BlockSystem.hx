@@ -2,6 +2,7 @@ package systems;
 
 //import openfl.display.DisplayObject;
 //import openfl.display.DisplayObjectContainer;
+import haxe.Timer;
 
 import ash.core.Engine;
 import ash.core.Entity;
@@ -24,6 +25,8 @@ import components.markers.ClickedEh;
 import components.GameEvent;
 
 import enums.EventTypes;
+
+import services.CameraService;
 
 import services.EntityFactory;
 import services.GameDataService;
@@ -116,21 +119,24 @@ class BlockSystem extends System {
 		}
 
 		// Cave-in
-		if(Util.chance(0.01) && Util.chance(0.1)) {
-			var block = EntityFactory.instance.findBlock();
-			var cavein = "
-			----X----
-			---XXX---
-			--XXXXX--
-			---XXX---
-			----X----";
+		if(Util.chance(0.01)) {//} && Util.chance(0.1)) {
+			CameraService.instance.triggerShake();
 
-			var position = block.get(TilePosition);
+				var block = EntityFactory.instance.findBlock();
+				var cavein = "
+				-X-
+				XXX
+				-X-";
 
-			TileMapService.instance.loadTilePattern(cavein, position.point.clone().add(-4,-2), true);
+				var position:TilePosition = block.get(TilePosition);
 
-			var event = new GameEvent(EventTypes.DISASTER, "Cave-In at " + position.point);
-			NotificationService.instance.addNotification(event);
+				var event = new GameEvent(EventTypes.DISASTER, "Cave-In at " + position.point);
+				NotificationService.instance.addNotification(event);
+
+			Timer.delay(function () {
+				TileMapService.instance.loadTilePattern(cavein, position.point.clone().add(-1,-1), true);
+			}, 400);
+
 		}
 	}
 

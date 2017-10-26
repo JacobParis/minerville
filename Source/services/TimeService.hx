@@ -81,15 +81,13 @@ class TimeService {
             if(Util.chance(0.01) && Util.chance(0.01)) {
                 var block = EntityFactory.instance.findBlock();
                 var cavein = "
-                ----X----
-                ---XXX---
-                --XXXXX--
-                ---XXX---
-                ----X----";
+				-X-
+				XXX
+				-X-";
 
                 var position = block.get(TilePosition);
 
-                TileMapService.instance.loadTilePattern(cavein, position.point.clone().add(-4,-2), true);
+                TileMapService.instance.loadTilePattern(cavein, position.point.clone().add(-1,-1), true);
 
                 var event = new GameEvent(EventTypes.DISASTER, "Cave-In at " + position.point);
                 NotificationService.instance.addNotification(event);
