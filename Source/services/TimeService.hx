@@ -59,7 +59,7 @@ class TimeService {
     private function startDay() {
         var delta = Math.ceil((this.start - this.stop)/10000);
         trace("Day begins at " + Util.fint(this.time) + " after a " + Util.fint(this.start - this.stop) + " unit rest");
-        UIService.instance.showCurtain("Day " + Util.fint(this.time/10000) , "(" + delta + " DAYS HAVE PASSED)");
+        UIService.instance.showCurtain("Day " + Math.ceil(this.time/10000) , "(" + delta + " DAYS HAVE PASSED)");
 
         var gold = 0;
 
