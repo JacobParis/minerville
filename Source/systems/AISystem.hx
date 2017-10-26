@@ -285,7 +285,7 @@ class AISystem extends System {
 
 			
 			// Stop beating a dead quartz
-			if(blockHealth.value == 0) factory.dropTask(node.entity);
+			if(blockHealth.value <= 0) factory.dropTask(node.entity);
 		}
 
 		// TODO move to different system
