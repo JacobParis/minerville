@@ -20,6 +20,8 @@ import ash.core.Entity;
 import components.Task;
 import components.TileImage;
 
+import enums.Types;
+
 import services.EntityFactory;
 import services.TaskService;
 
@@ -38,7 +40,7 @@ class TileMapService {
     private var container:DisplayObjectContainer;
     private var factory:EntityFactory;
 
-    public var enumMap:EnumValueMap<TileType, Int>;
+    public var enumMap:EnumValueMap<TileTypes, Int>;
     private var backdrops:Tilemap;
     private var actives:Tilemap;
 
@@ -59,9 +61,9 @@ class TileMapService {
             var tileset = new Tileset(bitmapData);
 
             // Assign each tile to TileType in order
-            for(i in 0...TileType.getConstructors().length) {
+            for(i in 0...TileTypes.getConstructors().length) {
                 var id = tileset.addRect(new Rectangle(2, (GameConfig.tileSize + 2) * i + 2, GameConfig.tileSize, GameConfig.tileSize));
-                this.enumMap.set(TileType.createByIndex(i), id);
+                this.enumMap.set(TileTypes.createByIndex(i), id);
             }
             
             this.backdrops = new Tilemap(GameConfig.tilesWide * GameConfig.tileSize, GameConfig.tilesHigh * GameConfig.tileSize, tileset);
@@ -101,7 +103,7 @@ class TileMapService {
             var position = new Point(topright.x + x - 1, topright.y + y);
             
 
-            var tileType:TileType;
+            var tileType:TileTypes;
             switch(filteredPattern.charAt(i)) {
                 case " ": continue;
                 case "-": continue;
@@ -110,16 +112,16 @@ class TileMapService {
                     if(rowLength == 0) rowLength = i;
                     continue;
                 }
-                case "X": tileType = TileType.WALL;
-                case "@": tileType = TileType.BASE;
-                case "W": tileType = TileType.WORKER;
-                case "G": tileType = TileType.ORE;
-                default: tileType = TileType.FLOOR;
+                case "X": tileType = TileTypes.WALL;
+                case "@": tileType = TileTypes.BASE;
+                case "W": tileType = TileTypes.WORKER;
+                case "G": tileType = TileTypes.ORE;
+                default: tileType = TileTypes.FLOOR;
             }
 
             // If we want to only fill in blank tiles
             // Overwrite = false + Clip = false
-            if(!overwrite && tileType != TileType.ORE && positionMap.get(position) != null) continue;
+            if(!overwrite && tileType != TileTypes.ORE && positionMap.get(position) != null) continue;
 
             // If we want to only fill in solid tiles
             // Overwrite = true + Clip = True
@@ -131,7 +133,7 @@ class TileMapService {
             newTileLocations.push(position);
             var id = enumMap.get(tileType);
 
-            var floor = new Tile(this.enumMap.get(TileType.FLOOR), (position.x + GameConfig.tilesLeft) * GameConfig.tileSize, (position.y + GameConfig.tilesUp) * GameConfig.tileSize);
+            var floor = new Tile(this.enumMap.get(TileTypes.FLOOR), (position.x + GameConfig.tilesLeft) * GameConfig.tileSize, (position.y + GameConfig.tilesUp) * GameConfig.tileSize);
             addBackdropTile(position, floor);
             
             switch(tileType) {
@@ -142,16 +144,16 @@ class TileMapService {
                     var hardness = 1;
                     var health = 1;
                     if(Util.chance(0.8)) {
-                        id = this.enumMap.get(TileType.WALL);
+                        id = this.enumMap.get(TileTypes.WALL);
                         health = Util.rnd(20, 30);
                     } else {
-                        id = this.enumMap.get(TileType.WALL_STONE);
+                        id = this.enumMap.get(TileTypes.WALL_STONE);
                         health = Util.rnd(40, 60);
                         hardness = 2;
                     }
                     this.factory.createBlock(position, id, health, hardness);
                 }
-                case BASE: this.factory.createBuilding(position, id, Buildings.BASE);
+                case BASE: this.factory.createBuilding(position, id, BuildingTypes.BASE);
                 case WORKER: this.factory.createWorker();
                 default: 1;
             }
@@ -278,22 +280,3 @@ class TileMapService {
     
 }
 
-enum TileType {
-    EMPTY;
-    FLOOR;
-    WALL;
-    WALL_STONE;
-    WALL_DAMAGED;
-    BASE;
-    WORKER;
-    WORKER_ORE;
-    ORE;
-    PICKAXE;
-}
-
-enum Direction {
-    RIGHT;
-    UP;
-    LEFT;
-    DOWN;
-}

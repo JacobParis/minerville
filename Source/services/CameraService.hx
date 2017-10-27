@@ -9,6 +9,8 @@ import openfl.geom.Matrix;
 
 import interfaces.InputListener;
 
+import services.EntityFactory;
+
 import util.Util;
 import util.Point;
 /**

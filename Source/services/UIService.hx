@@ -1,13 +1,9 @@
 package services;
 
 import haxe.ui.core.Screen;
-import haxe.ui.components.Label;
 import haxe.ui.components.Button;
 import haxe.ui.containers.dialogs.DialogOptions;
 import haxe.ui.containers.ScrollView;
-import haxe.ui.containers.Box;
-
-
 import haxe.ui.macros.ComponentMacros;
 
 import openfl.Assets;
@@ -17,7 +13,6 @@ import openfl.display.DisplayObjectContainer;
 import openfl.display.Tilemap;
 import openfl.display.Tileset;
 import openfl.display.Tile;
-import openfl.display.Graphics;
 import openfl.display.Sprite;
 
 import openfl.events.MouseEvent;
@@ -26,18 +21,10 @@ import openfl.text.TextField;
 import openfl.text.TextFieldAutoSize;
 import openfl.text.TextFormat;
 import openfl.text.TextFormatAlign;
+
 import openfl.geom.Rectangle;
 
-import ash.core.Engine;
-
-import nodes.EventNode;
-
-import components.GameEvent;
-
-import services.TaskService;
 import services.NotificationService;
-
-import util.Util;
 
 /**
  *  This Service displays the UI on a layer above the main game 

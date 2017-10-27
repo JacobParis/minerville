@@ -2,19 +2,14 @@ package systems;
 
 import ash.core.Engine;
 import ash.core.Entity;
-import ash.core.NodeList;
 import ash.core.System;
 
-import components.markers.ClickedEh;
-import components.Marker;
-import components.Stationary;
+import components.Markers;
 import components.Task;
-import components.TileImage;
 import components.TilePosition;
 import components.Worker;
 
-import components.ai.Mining;
-import components.ai.Walking;
+import enums.Types;
 
 import nodes.WorkerNode;
 import nodes.BlockNode;
@@ -41,10 +36,10 @@ class ControlSystem extends System {
 	override public function update(_):Void {
 		for (node in engine.getNodeList(WorkerNode)) {
 			// Handle click
-			if(!node.entity.has(ClickedEh)) 
+			if(!node.entity.has(ClickMarker)) 
 				continue;
 
-			node.entity.remove(ClickedEh);
+			node.entity.remove(ClickMarker);
 
 			if(this.markedEntity != null && this.markedEntity.has(Marker))
 				this.markedEntity.remove(Marker);
@@ -61,20 +56,20 @@ class ControlSystem extends System {
 			// Remove any current tasks
 			EntityFactory.instance.dropTask(this.markedEntity);
 
-			if(!this.markedEntity.has(Stationary))
-				this.markedEntity.add(new Stationary());
+			if(!this.markedEntity.has(StationaryMarker))
+				this.markedEntity.add(new StationaryMarker());
 		}
 
 		for (node in engine.getNodeList(BlockNode)) {
 			// Handle click
-			if(!node.entity.has(ClickedEh)) 
+			if(!node.entity.has(ClickMarker)) 
 				continue;
 
-			node.entity.remove(ClickedEh);
+			node.entity.remove(ClickMarker);
 			trace("Clicked on block!");
 			
 
-			var task = new Task(Skills.MINE, node.entity);
+			var task = new Task(SkillTypes.MINE, node.entity);
 			if(this.markedEntity == null) {
 				// Send to Task Allocator
 				TaskService.instance.addTask(task, 10);
@@ -85,13 +80,13 @@ class ControlSystem extends System {
 
 		for (node in engine.getNodeList(LootNode)) {
 			// Handle click
-			if(!node.entity.has(ClickedEh)) 
+			if(!node.entity.has(ClickMarker)) 
 				continue;
 
-			node.entity.remove(ClickedEh);
+			node.entity.remove(ClickMarker);
 
 			trace("Clicked on ore!");
-			var task = new Task(Skills.CARRY, node.entity);
+			var task = new Task(SkillTypes.CARRY, node.entity);
 			if(this.markedEntity == null) {
 				// Send to Task Allocator
 				TaskService.instance.addTask(task, 10);

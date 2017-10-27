@@ -10,24 +10,18 @@ import ash.core.Node;
 import ash.core.NodeList;
 import ash.core.System;
 
-import components.Hardness;
 
-import components.Health;
-import components.Ore;
+import components.Items;
+import components.Markers;
+import components.Properties;
 import components.Task;
-import components.Dead;
-import components.Worker;
-import components.Stimulus;
-import components.Marker;
 import components.TilePosition;
-import components.markers.ClickedEh;
-
+import components.Worker;
 import components.GameEvent;
 
-import enums.EventTypes;
+import enums.Types;
 
 import services.CameraService;
-
 import services.EntityFactory;
 import services.GameDataService;
 import services.NotificationService;
@@ -68,10 +62,10 @@ class BlockSystem extends System {
 	override public function update(_):Void {
 		for ( node in engine.getNodeList(BlockNode)) {
 			// TODO delegate to animation system
-			if(node.tile.id == TileMapService.instance.enumMap.get(TileType.WALL_DAMAGED)) {
+			if(node.tile.id == TileMapService.instance.enumMap.get(TileTypes.WALL_DAMAGED)) {
 				if(node.entity.has(Hardness)) {
 					var hardness = node.entity.get(Hardness).value - 1;
-					node.tile.id = TileMapService.instance.enumMap.get(TileType.WALL) + hardness;
+					node.tile.id = TileMapService.instance.enumMap.get(TileTypes.WALL) + hardness;
 				}
 			}
 		}
@@ -86,9 +80,9 @@ class BlockSystem extends System {
 					var chance = 0.5 / node.entity.get(Hardness).value / node.entity.get(Hardness).value;
 
 					if(node.entity.has(Stimulus)) {
-						TaskService.instance.addTask(new Task(Skills.MINE, node.entity), node.entity.get(Stimulus).strength);
+						TaskService.instance.addTask(new Task(SkillTypes.MINE, node.entity), node.entity.get(Stimulus).strength);
 					} else if(Util.chance(chance)) {
-						TaskService.instance.addTask(new Task(Skills.MINE, node.entity));
+						TaskService.instance.addTask(new Task(SkillTypes.MINE, node.entity));
 					}
 
 				}
@@ -101,10 +95,10 @@ class BlockSystem extends System {
 			}
 
 			// TODO delegate to animation system
-			if(node.tile.id == TileMapService.instance.enumMap.get(TileType.WALL_DAMAGED)) {
+			if(node.tile.id == TileMapService.instance.enumMap.get(TileTypes.WALL_DAMAGED)) {
 				if(node.entity.has(Hardness)) {
 					var hardness = node.entity.get(Hardness).value - 1;
-					node.tile.id = TileMapService.instance.enumMap.get(TileType.WALL) + hardness;
+					node.tile.id = TileMapService.instance.enumMap.get(TileTypes.WALL) + hardness;
 				}
 			}
 		}
@@ -113,22 +107,22 @@ class BlockSystem extends System {
 			// Randomly ask to be collected
 			if(TechService.instance.isTechUnlocked("search-ore")) {
 				if(node.entity.has(Stimulus)) {
-					TaskService.instance.addTask(new Task(Skills.CARRY, node.entity), node.entity.get(Stimulus).strength);
+					TaskService.instance.addTask(new Task(SkillTypes.CARRY, node.entity), node.entity.get(Stimulus).strength);
 				} else if(Util.chance(0.8)) {
-					TaskService.instance.addTask(new Task(Skills.CARRY, node.entity), 2);
+					TaskService.instance.addTask(new Task(SkillTypes.CARRY, node.entity), 2);
 				}
 			}
 		}
 
 		// Cave-in
-		if(Util.chance(0.1)) {//} && Util.chance(0.1)) {
-			//CameraService.instance.triggerShake();
+		if(Util.chance(0.01) && Util.chance(0.1)) {
+			CameraService.instance.triggerShake();
 
 			var block = EntityFactory.instance.findBlock();
 			var cavein = "
-			-XXXXXXX-
-			XXXXXXXXXXX
-			-XXXXXXXX-";
+			-X-
+			XXX
+			-X-";
 
 			var position:TilePosition = block.get(TilePosition);
 
@@ -144,7 +138,7 @@ class BlockSystem extends System {
 					if(crushedWorker == null) continue;
 
 					trace("Crushed Worker");
-					crushedWorker.add(new Dead("cave-in"));
+					crushedWorker.add(new DeadMarker("cave-in"));
 
 
 		

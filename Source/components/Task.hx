@@ -2,6 +2,8 @@ package components;
 
 import ash.core.Entity;
 
+import enums.Types;
+
 import services.TaskService;
 
 import util.Point;
@@ -9,7 +11,7 @@ import util.ds.Prioritizable;
 
 class Task {
     public var target:Entity;
-    public var action:Skills;
+    public var action:SkillTypes;
     public var difficulty:Float = 1;
 
     public var timeTaken:Float;
@@ -20,7 +22,7 @@ class Task {
     public var priority:Float = 1;
 	public var position(default, null):Int;
 
-    public function new(action:Skills, target:Entity) {
+    public function new(action:SkillTypes, target:Entity) {
         this.action = action;
         this.target = target;
     }

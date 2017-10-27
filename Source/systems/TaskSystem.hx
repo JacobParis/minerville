@@ -1,25 +1,21 @@
 package systems;
 
 import ash.core.Engine;
-import ash.core.Entity;
 import ash.core.NodeList;
 import ash.core.System;
 
-import components.ai.Mining;
-import components.ai.Walking;
-
-import components.Marker;
-
+import components.Behaviours;
+import components.Items;
+import components.Markers;
 import components.TilePosition;
 import components.Task;
 import components.TaskBid;
 import components.Worker;
-import components.ToolMining;
+
+import enums.Types;
 
 import nodes.WorkerNode;
 import nodes.BidNode;
-import nodes.TaskWorkerNode;
-
 
 import services.TaskService;
 
@@ -84,7 +80,7 @@ class TaskSystem extends System {
 				}
 				//trace(node.entity.name);
 				// TODO handle carry limit here
-				if(task.action == Skills.CARRY) {
+				if(task.action == SkillTypes.CARRY) {
 					if(node.entity.has(ToolMining) && task.target.has(ToolMining)) {
 						if(node.entity.get(ToolMining).strength > task.target.get(ToolMining).strength)
 							threshold = 1;					

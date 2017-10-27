@@ -2,7 +2,7 @@ package services;
 
 import components.GameEvent;
 
-import enums.EventTypes;
+import enums.Types;
 
 import util.Util;
 
@@ -16,7 +16,7 @@ class GameDataService {
 
     public var screenVisible:Bool = true;
 
-    public var gold:Int = 0;
+    public var gold:Int = 100000;
     public var ore:Int = 0;
     public var miners:Int = 1;
     public var usedMiners:Int = 0;

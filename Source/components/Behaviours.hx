@@ -1,7 +1,6 @@
-package components.ai;
+package components;
 
 import ash.core.Entity;
-
 import util.Point;
 
 class Mining {
@@ -12,6 +11,14 @@ class Mining {
         this.block = block;
         this.strength = strength;
     }
+}
 
-    
+class Walking {
+    public var destination:Point;
+    public var target:Entity;
+
+    public function new(x:Float, y:Float, target:Entity) {
+        this.destination = new Point(x, y);
+        this.target = target;
+    }
 }

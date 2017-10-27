@@ -1,6 +1,6 @@
 package components;
 
-import enums.EventTypes;
+import enums.Types;
 
 class GameEvent {
     public var type:EventTypes;

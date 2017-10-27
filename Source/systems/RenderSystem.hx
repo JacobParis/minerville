@@ -6,7 +6,7 @@ import ash.core.Engine;
 import ash.core.NodeList;
 import ash.core.System;
 
-import components.Marker;
+import components.Markers;
 import components.TilePosition;
 
 import nodes.MarkerNode;

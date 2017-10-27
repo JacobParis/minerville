@@ -3,7 +3,7 @@ package services;
 import haxe.Json;
 import openfl.Assets;
 
-import util.Util;
+import services.EntityFactory;
 
 class TechService {
     public static var instance(default, null):TechService = new TechService();

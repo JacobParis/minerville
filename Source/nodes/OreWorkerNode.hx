@@ -4,7 +4,7 @@ import ash.core.Node;
 
 import components.TilePosition;
 import components.Worker;
-import components.Ore;
+import components.Items;
 
 class OreWorkerNode extends Node<OreWorkerNode> {
     public var ore:Ore;

@@ -2,7 +2,7 @@ package nodes;
 
 import ash.core.Node;
 
-import components.ai.Mining;
+import components.Behaviours;
 import components.TilePosition;
 import components.Worker;
 

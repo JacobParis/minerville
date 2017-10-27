@@ -2,7 +2,7 @@ package nodes;
 
 import ash.core.Node;
 
-import components.Marker;
+import components.Markers;
 import components.TilePosition;
 
 // import components.Marker;

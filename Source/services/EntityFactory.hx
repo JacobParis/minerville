@@ -2,53 +2,29 @@ package services;
 
 import openfl.display.Tile;
 
-import openfl.events.Event;
-import openfl.events.MouseEvent;
-
 import ash.core.Entity;
 import ash.core.Engine;
 import ash.core.Node;
 import ash.core.NodeList;
-import ash.fsm.EntityStateMachine;
-import ash.tools.ComponentPool;
 
-import interfaces.InputListener;
 
-import components.Building;
-import components.Expiry;
-import components.GameEvent;
-import components.GameState;
-import components.Hardness;
-import components.Health;
-import components.Loot;
-import components.Marker;
-import components.Ore;
+import components.Behaviours;
+import components.Items;
+import components.Markers;
 import components.Path;
-import components.Position;
-import components.Stationary;
-import components.Stimulus;
-import components.SmoothMovement;
+import components.Properties;
 import components.Task;
 import components.TileImage;
 import components.TilePosition;
-import components.ToolMining;
 import components.Worker;
 
+import enums.Types;
 
-
-import components.ai.Walking;
-import components.ai.Mining;
-
-import components.markers.ClickedEh;
-
-import enums.EventTypes;
 import nodes.WorkerNode;
 import nodes.BlockNode;
 import nodes.LootNode;
 import nodes.TileNode;
 import nodes.StationaryObjectNode;
-
-import graphics.AsciiView;
 
 import services.TaskService;
 import services.TileMapService;
@@ -83,7 +59,7 @@ class EntityFactory {
         var entity = testHit(x, y);
         if(entity == null) return;
 
-        entity.add(new ClickedEh());
+        entity.add(new ClickMarker());
     }
 
     /**
@@ -212,22 +188,13 @@ class EntityFactory {
         }
     }
 
-    /* Create Game Entity */
-    public function createGame():Entity {
-        var gameEntity:Entity = new Entity()
-        .add(new GameState());
-
-        this.engine.addEntity(gameEntity);
-        return gameEntity;
-    }
-
-    public function createBuilding(cell:Point, id:Int, name:Buildings):Entity {
-        var tile:Tile = new Tile(TileMapService.instance.enumMap.get(TileType.BASE));
+    public function createBuilding(cell:Point, id:Int, name:BuildingTypes):Entity {
+        var tile:Tile = new Tile(TileMapService.instance.enumMap.get(TileTypes.BASE));
         var building:Entity = new Entity(name.getName())
         .add(new TilePosition(cell.x, cell.y))
         .add(new TileImage(tile, true))
-        .add(new Stationary())
-        .add(new Building());
+        .add(new StationaryMarker())
+        .add(new BuildingMarker());
 
         this.engine.addEntity(building);
         return building;
@@ -237,7 +204,7 @@ class EntityFactory {
         var tile:Tile = new Tile(id);
         var block:Entity = new Entity()
         .add(new TilePosition(cell.x, cell.y))
-        .add(new Stationary())
+        .add(new StationaryMarker())
         .add(new TileImage(tile))
         .add(new Hardness(hardness))
         .add(new Health(health));
@@ -247,8 +214,8 @@ class EntityFactory {
     }
 
     public function createWorker(?name:String):Entity {
-        var base:Entity = this.engine.getEntityByName(Buildings.BASE.getName());
-        var tile:Tile = new Tile(TileMapService.instance.enumMap.get(TileType.WORKER));
+        var base:Entity = this.engine.getEntityByName(BuildingTypes.BASE.getName());
+        var tile:Tile = new Tile(TileMapService.instance.enumMap.get(TileTypes.WORKER));
 
         // Choose a random safe tile surrounding the base
         var neighbours = [new Point(1, 0), new Point(1, -1), new Point(0, -1), new Point(-1, -1), new Point(-1, 0), new Point(-1, 1),new Point(0, 1), new Point(1, 1)];
@@ -264,7 +231,7 @@ class EntityFactory {
         var worker:Entity = new Entity(name)
         .add(new TilePosition(position.x, position.y))
         .add(new TileImage(tile, true))
-        .add(new SmoothMovement())
+        .add(new SmoothMovementMarker())
         .add(new Worker());
         
         this.engine.addEntity(worker);
@@ -272,12 +239,12 @@ class EntityFactory {
     }
 
     public function createMiningTool(strength:Int):Entity {
-        var base:Entity = this.engine.getEntityByName(Buildings.BASE.getName());
+        var base:Entity = this.engine.getEntityByName(BuildingTypes.BASE.getName());
         var position:TilePosition = base.get(TilePosition);
         var tool:Entity = new Entity()
         .add(new TilePosition(position.x + Util.anyOneOf([-1, 1]), position.y + Util.anyOneOf([-1, 1])))
         .add(new TileImage(new Tile(9), true))
-        .add(new Loot())
+        .add(new LootMarker())
         .add(new ToolMining(strength));
 
         this.engine.addEntity(tool);
@@ -285,12 +252,12 @@ class EntityFactory {
     }
 
     public function createOre(cell:Point, id:Int):Entity {
-        var tile:Tile = new Tile(TileMapService.instance.enumMap.get(TileType.ORE));
+        var tile:Tile = new Tile(TileMapService.instance.enumMap.get(TileTypes.ORE));
         var ore:Entity = new Entity()
         .add(new TilePosition(cell.x, cell.y))
-        .add(new Stationary())
+        .add(new StationaryMarker())
         .add(new TileImage(tile, true))
-        .add(new Loot())
+        .add(new LootMarker())
         .add(new Ore(id));
 
         this.engine.addEntity(ore);
@@ -314,8 +281,8 @@ class EntityFactory {
         var loot:Entity = new Entity()
         .add(new TilePosition(position.x, position.y))
         .add(new TileImage(new Tile(id), true))
-        .add(new Loot())
-        .add(new Stationary())
+        .add(new LootMarker())
+        .add(new StationaryMarker())
         .add(new Expiry(100))
         .add(lootComponent);
 
@@ -347,9 +314,9 @@ class EntityFactory {
 		}
 	}
     public function getWalkingToBase():Task {
-        var base:Entity = this.engine.getEntityByName(Buildings.BASE.getName());
+        var base:Entity = this.engine.getEntityByName(BuildingTypes.BASE.getName());
 
-        return new Task(Skills.WALK, base);
+        return new Task(SkillTypes.WALK, base);
     }
 
     private function randomName():String {
@@ -468,16 +435,3 @@ class EntityFactory {
     }
 }
 
-enum Buildings {
-    BASE;
-    REFINERY;
-    FACTORY;
-    SILO;
-    HOUSE;
-}
-
-enum Workers {
-    WORKER;
-    MINER;
-    WARRIOR;
-}

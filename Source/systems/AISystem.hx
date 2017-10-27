@@ -7,34 +7,26 @@ import ash.core.Entity;
 import ash.core.NodeList;
 import ash.core.System;
 
+import components.Behaviours;
+import components.Items;
+import components.Properties;
 import components.TilePosition;
-import components.Hardness;
-import components.Health;
-import components.Loot;
-import components.Marker;
-import components.Ore;
+import components.Markers;
 import components.Path;
-import components.Stationary;
 import components.Task;
 import components.TileImage;
-import components.ToolMining;
-
-
 import components.Worker;
 
-import components.ai.Mining;
+import enums.Types;
 
 import nodes.WorkerNode;
 import nodes.MiningWorkerNode;
-import nodes.OreWorkerNode;
 import nodes.TaskWorkerNode;
 
 import services.EntityFactory;
 import services.GameDataService;
-import services.TaskService;
 import services.TileMapService;
 
-import util.Array2D;
 import util.RelativeArray2D;
 import util.Point;
 import util.Util;
@@ -195,8 +187,8 @@ class AISystem extends System {
 				// Remove stationary component if present
 				// Marked Entities should always be stationary
 				// This stops other workers from bumping them out of the way
-				if(node.entity.has(Stationary) && !isSelected) {
-					node.entity.remove(Stationary);
+				if(node.entity.has(StationaryMarker) && !isSelected) {
+					node.entity.remove(StationaryMarker);
 				}
 
 				var vision = isSelected ? 30 : 6;
@@ -241,7 +233,7 @@ class AISystem extends System {
 				var collidee = factory.workerAt(target.x, target.y);
 				if(collidee != null) {
 					collidee.get(TilePosition).point = position.point;
-					node.entity.add(new Stationary());
+					node.entity.add(new StationaryMarker());
 				}
 
 				// The target position is safe, move there
@@ -249,11 +241,11 @@ class AISystem extends System {
 			} else {
 				// We have arrived at our destination
 				if(isSelected) trace(node.entity.name + " has reached their destination.");
-				node.entity.add(new Stationary());
+				node.entity.add(new StationaryMarker());
 				switch(node.task.action) {
 					case MINE: mineBlock(node.entity, node.task);
 					case CARRY: {
-						if(node.task.target.has(Loot)) collectLoot(node.entity, node.task);
+						if(node.task.target.has(LootMarker)) collectLoot(node.entity, node.task);
 					}
 					case ATTACK: 1;
 					case WALK: completeWalk(node.entity, node.task);
@@ -281,7 +273,7 @@ class AISystem extends System {
 
 			// TODO delegate to animation system
 			var blockTile:TileImage = node.mining.block.get(TileImage);
-			blockTile.id = map.enumMap.get(TileType.WALL_DAMAGED);
+			blockTile.id = map.enumMap.get(TileTypes.WALL_DAMAGED);
 
 			
 			// Stop beating a dead quartz
@@ -294,9 +286,9 @@ class AISystem extends System {
 
 			var tileImage:TileImage = node.entity.get(TileImage);
 			if(node.entity.has(Ore)) {
-				tileImage.id = map.enumMap.get(TileType.WORKER_ORE);
+				tileImage.id = map.enumMap.get(TileTypes.WORKER_ORE);
 			} else {
-				tileImage.id = map.enumMap.get(TileType.WORKER);
+				tileImage.id = map.enumMap.get(TileTypes.WORKER);
 			}
 		}
 	}
@@ -310,10 +302,10 @@ class AISystem extends System {
         if(entity.has(Path)) entity.remove(Path);
 
 		var worker:Worker = entity.get(Worker);
-		worker.train(Skills.MINE, entity.name);
+		worker.train(SkillTypes.MINE, entity.name);
 
 		entity.add(new Mining(task.target));
-		entity.add(new Stationary());
+		entity.add(new StationaryMarker());
 	}
 
 	private function collectLoot(entity:Entity, task:Task) {
@@ -346,12 +338,12 @@ class AISystem extends System {
 	private function completeWalk(entity:Entity, task:Task) {
 		//trace("completeWalk");
 		if(entity.has(Marker)) trace(entity.name + " has arrived at the Base");
-		if(task.target.name == Buildings.BASE.getName()) {
+		if(task.target.name == BuildingTypes.BASE.getName()) {
 			if(entity.has(Ore)) {
 				if(entity.has(Marker)) trace(entity.name + " has dropped off Ore");
 				entity.remove(Ore);
 				var worker:Worker = entity.get(Worker);
-				worker.train(Skills.CARRY, entity.name);
+				worker.train(SkillTypes.CARRY, entity.name);
 				// Estimate a little less time next time
 				worker.tweakEstimations(task.timeTaken - task.estimatedTime);
 				GameDataService.instance.requestOre();

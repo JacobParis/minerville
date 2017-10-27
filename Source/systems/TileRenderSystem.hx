@@ -2,14 +2,12 @@ package systems;
 
 //import openfl.display.DisplayObject;
 import openfl.display.DisplayObjectContainer;
-import openfl.display.Tile;
 
 import ash.core.Engine;
 import ash.core.NodeList;
 import ash.core.System;
 
-import components.TileImage;
-import components.SmoothMovement;
+import components.Markers;
 
 import nodes.TileNode;
 
@@ -67,7 +65,7 @@ class TileRenderSystem extends System {
         var originChanged = (this.oldLeft != GameConfig.tilesLeft) || (this.oldUp != GameConfig.tilesUp);
         for (node in this.nodes) {
             
-            if(node.entity.has(SmoothMovement) && !originChanged) {
+            if(node.entity.has(SmoothMovementMarker) && !originChanged) {
                 var targetX = (node.position.x + GameConfig.tilesLeft) * GameConfig.tileSize;
                 var targetY = (node.position.y + GameConfig.tilesUp) * GameConfig.tileSize;
                 node.tile.x = node.tile.tile.x + Math.min(Math.max((targetX - node.tile.tile.x), -16), 16);

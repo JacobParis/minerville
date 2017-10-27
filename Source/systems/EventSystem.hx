@@ -1,22 +1,9 @@
 package systems;
 
-import haxe.ui.core.Screen;
-import haxe.ui.components.Label;
-import haxe.ui.components.Button;
-import haxe.ui.containers.dialogs.DialogOptions;
-import haxe.ui.macros.ComponentMacros;
-
-
 import ash.core.Engine;
-import ash.core.NodeList;
 import ash.core.System;
 
-import components.markers.ClickedEh;
-import components.GameEvent;
-
-import enums.EventTypes;
-
-import nodes.EventNode;
+import components.Markers;
 
 import services.UIService;
 
@@ -37,9 +24,9 @@ class EventSystem extends System {
 		var base = engine.getEntityByName("BASE");
 
 		if(base == null) return;
-		if(!base.has(ClickedEh)) return;
+		if(!base.has(ClickMarker)) return;
 
-		base.remove(ClickedEh);
+		base.remove(ClickMarker);
 
 		UIService.instance.showNotifications();
 

@@ -1,6 +1,7 @@
 package components;
 
-import services.TaskService;
+import enums.Types;
+
 import util.Point;
 import util.Util;
 
@@ -68,7 +69,7 @@ class Worker {
      *  Train a skill. Should be called every time a task is completed
      *  @param skill - The skill to train
      */
-    public function train(skill:Skills, name:String = "unnamed"):Void {
+    public function train(skill:SkillTypes, name:String = "unnamed"):Void {
         var x = 1.01;
         switch(skill) {
             case MINE: {
@@ -104,7 +105,7 @@ class Worker {
      *  Train a skill. Should be called every time a task is completed
      *  @param skill - The skill to train
      */
-    public function detrain(skill:Skills, name:String = "unnamed"):Void {
+    public function detrain(skill:SkillTypes, name:String = "unnamed"):Void {
         var x = 1.01;
         switch(skill) {
             case MINE: {

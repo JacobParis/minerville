@@ -9,7 +9,7 @@ import components.GameEvent;
 import services.EntityFactory;
 import services.NotificationService;
 
-import enums.EventTypes;
+import enums.Types;
 
 import nodes.WorkerNode;
 
@@ -41,7 +41,7 @@ class WorkerSystem extends System {
 
 			var event = new GameEvent(EventTypes.FATALITY, node.entity.name + " was killed by " + node.dead.cause);
 			NotificationService.instance.addNotification(event);
-			
+
 			EntityFactory.instance.destroyEntity(node.entity);
 		}
 	}

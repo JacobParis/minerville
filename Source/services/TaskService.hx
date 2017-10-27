@@ -1,19 +1,9 @@
 package services;
 
-import ash.core.Entity;
-
-import components.Health;
 import components.Task;
-import components.Worker;
 
-import util.Point;
-import util.Util;
-
-import util.ds.Prioritizable;
 import util.ds.ArrayedQueue;
-import util.ds.ArrayedStack;
 import util.ds.Queue;
-import util.ds.Stack;
 
 class TaskService {
     public static var instance(default, null):TaskService = new TaskService();
@@ -77,9 +67,3 @@ class TaskService {
 
 
 
-enum Skills {
-    MINE;
-    WALK;
-    CARRY;
-    ATTACK;
-}

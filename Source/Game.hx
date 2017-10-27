@@ -31,7 +31,6 @@ import systems.LootSystem;
 import systems.RenderSystem;
 import systems.TaskSystem;
 import systems.TileRenderSystem;
-import systems.TockSystem;
 import systems.WorkerSystem;
 
 
@@ -74,8 +73,6 @@ class Game {
         var controlSystem = new ControlSystem();
         addSystem(controlSystem);
 
-        var tockSystem = new TockSystem();
-        addSystem(tockSystem);
 
         var lootSystem = new LootSystem();
         addSystem(lootSystem);
@@ -101,8 +98,6 @@ class Game {
         var renderSystem = new RenderSystem(uiLayer);
         addSystem(renderSystem);
 
-        factory.createGame();
-
         tickProvider = new FrameTickProvider(gameLayer);
         tickProvider.add(input.dispatchEvents);
         tickProvider.add(engine.update);
@@ -115,7 +110,6 @@ class Game {
 
         tockProvider = new FixedTickProvider(gameLayer, 0.2);
         tockProvider.add(controlSystem.tock);
-        tockProvider.add(tockSystem.tock);
         tockProvider.add(lootSystem.tock);
         tockProvider.add(workerSystem.tock);
         tockProvider.add(blockSystem.tock);

@@ -2,7 +2,7 @@ package nodes;
 
 import ash.core.Node;
 
-import components.Health;
+import components.Properties;
 import components.TilePosition;
 import components.TileImage;
 
