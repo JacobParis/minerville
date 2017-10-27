@@ -4,4 +4,5 @@ enum EventTypes {
     LOOT;
     MINE;
     DISASTER;
+    FATALITY;
 }

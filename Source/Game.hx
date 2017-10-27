@@ -32,6 +32,7 @@ import systems.RenderSystem;
 import systems.TaskSystem;
 import systems.TileRenderSystem;
 import systems.TockSystem;
+import systems.WorkerSystem;
 
 
 class Game {
@@ -79,6 +80,9 @@ class Game {
         var lootSystem = new LootSystem();
         addSystem(lootSystem);
 
+        var workerSystem = new WorkerSystem();
+        addSystem(workerSystem);
+
         var taskSystem = new TaskSystem();
         addSystem(taskSystem);
 
@@ -113,6 +117,7 @@ class Game {
         tockProvider.add(controlSystem.tock);
         tockProvider.add(tockSystem.tock);
         tockProvider.add(lootSystem.tock);
+        tockProvider.add(workerSystem.tock);
         tockProvider.add(blockSystem.tock);
         tockProvider.add(taskSystem.tock);
         tockProvider.add(aiSystem.tock);

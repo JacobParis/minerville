@@ -15,7 +15,7 @@ import components.Hardness;
 import components.Health;
 import components.Ore;
 import components.Task;
-
+import components.Dead;
 import components.Worker;
 import components.Stimulus;
 import components.Marker;
@@ -41,6 +41,8 @@ import nodes.LootNode;
 import nodes.WorkerNode;
 
 import util.Util;
+import util.Point;
+
 
 /**
  *  This System operates on Block tiles
@@ -119,22 +121,34 @@ class BlockSystem extends System {
 		}
 
 		// Cave-in
-		if(Util.chance(0.01)) {//} && Util.chance(0.1)) {
-			CameraService.instance.triggerShake();
+		if(Util.chance(0.1)) {//} && Util.chance(0.1)) {
+			//CameraService.instance.triggerShake();
 
-				var block = EntityFactory.instance.findBlock();
-				var cavein = "
-				-X-
-				XXX
-				-X-";
+			var block = EntityFactory.instance.findBlock();
+			var cavein = "
+			-XXXXXXX-
+			XXXXXXXXXXX
+			-XXXXXXXX-";
 
-				var position:TilePosition = block.get(TilePosition);
+			var position:TilePosition = block.get(TilePosition);
 
-				var event = new GameEvent(EventTypes.DISASTER, "Cave-In at " + position.point);
-				NotificationService.instance.addNotification(event);
+			var event = new GameEvent(EventTypes.DISASTER, "Cave-In at " + position.point);
+			NotificationService.instance.addNotification(event);
 
 			Timer.delay(function () {
-				TileMapService.instance.loadTilePattern(cavein, position.point.clone().add(-1,-1), true);
+				 var newPoints = TileMapService.instance.loadTilePattern(cavein, position.point.clone().add(-1,-1), true);
+
+
+				for(cell in newPoints) {
+					var crushedWorker = EntityFactory.instance.workerAt(cell.x, cell.y);
+					if(crushedWorker == null) continue;
+
+					trace("Crushed Worker");
+					crushedWorker.add(new Dead("cave-in"));
+
+
+		
+				}
 			}, 400);
 
 		}
