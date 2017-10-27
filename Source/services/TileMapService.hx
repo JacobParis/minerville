@@ -90,7 +90,8 @@ class TileMapService {
         return this;
     }
 
-    public function loadTilePattern(pattern:String, topright:Point, overwrite:Bool = false) {
+    public function loadTilePattern(pattern:String, topright:Point, overwrite:Bool = false):Array<Point> {
+        var newTileLocations:Array<Point> = [];
         var stripNewlines = (~/\n/g).replace(pattern, "¬");
         var filteredPattern = (~/\s/g).replace(stripNewlines, "");
         var rowLength = 0;
@@ -124,6 +125,10 @@ class TileMapService {
             // Overwrite = true + Clip = True
             if(overwrite && positionMap.get(position) == null) continue;
             
+            // If the current tile is the same as the one we are placing, Don't
+            if(positionMap.get(position) != null && positionMap.get(position).id == this.enumMap.get(tileType)) continue;
+
+            newTileLocations.push(position);
             var id = enumMap.get(tileType);
 
             var floor = new Tile(this.enumMap.get(TileType.FLOOR), (position.x + GameConfig.tilesLeft) * GameConfig.tileSize, (position.y + GameConfig.tilesUp) * GameConfig.tileSize);
@@ -150,7 +155,10 @@ class TileMapService {
                 case WORKER: this.factory.createWorker();
                 default: 1;
             }
+
         }
+
+        return newTileLocations;
     }
 
     /**
