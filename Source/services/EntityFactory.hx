@@ -157,7 +157,7 @@ class EntityFactory {
         for(node in nodes) {
             if(node.position.x == x
             && node.position.y == y) {
-                if(!node.entity.has(Stationary)) return node.entity;
+                return node.entity;
             }
         }
         return null;
@@ -327,8 +327,6 @@ class EntityFactory {
 		//trace(entity.name + " has dropped task " + task.action.getName());
 		//trace("    Expected duration: " + task.estimatedTime);
 		//trace("    Actual time: " + task.timeTaken);
-
-        Main.log(entity.components);
 
 		if(entity.has(Mining)) entity.remove(Mining);
         if(entity.has(Walking)) entity.remove(Walking);
