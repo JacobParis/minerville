@@ -341,8 +341,6 @@ class AISystem extends System {
 			entity.add(returnTask);
 			
 		}
-
-		Main.log(entity);
 	}
 
 	private function completeWalk(entity:Entity, task:Task) {

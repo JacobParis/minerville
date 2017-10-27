@@ -44,7 +44,6 @@ class ControlSystem extends System {
 			if(!node.entity.has(ClickedEh)) 
 				continue;
 
-			Main.log(node.entity.components);
 			node.entity.remove(ClickedEh);
 
 			if(this.markedEntity != null && this.markedEntity.has(Marker))
