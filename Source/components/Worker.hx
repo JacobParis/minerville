@@ -10,7 +10,6 @@ class Worker {
     public var carryExperience:Float = 10;
     public var attackExperience:Float = 10;
 
-    public var estimationTweak:Float;
     public function new() {}
 
     /** A worker is likely to accept any task that surpasses its threshold. 
@@ -47,24 +46,20 @@ class Worker {
 
         switch(task.action) {
             case MINE: {
-                return 10 / this.miningSpeed() + walkingTime + this.estimationTweak;
+                return 10 / this.miningSpeed() + walkingTime;
             }
             case WALK: {
-                return walkingTime + this.estimationTweak;
+                return walkingTime;
             }
             case CARRY: {
-                return Point.distance(new Point(10,10), task.location()) / walkingSpeed() + walkingTime + this.estimationTweak;
+                return Point.distance(new Point(10,10), task.location()) / walkingSpeed() + walkingTime;
             }
             case ATTACK: {
-                return task.difficulty / attackDamage() + this.estimationTweak;
+                return task.difficulty / attackDamage();
             }
         }
     }
 
-    public function tweakEstimations(amount:Float) {
-        this.estimationTweak += amount / Util.rnd(5, 10);
-        //trace(this.estimationTweak);
-    }
     /**
      *  Train a skill. Should be called every time a task is completed
      *  @param skill - The skill to train
@@ -92,28 +87,6 @@ class Worker {
                 this.attackExperience = buff(this.attackExperience, x, 4);
                 this.miningExperience = debuff(this.miningExperience, x, 2);
                 this.carryExperience = debuff(this.carryExperience, x, 2);
-            }
-        }
-
-        //trace("Experience: {");
-        //trace("    Mining: " + this.miningExperience);
-        //trace("    Carry: " + this.carryExperience);
-        //trace("}");
-    }
-
-    /**
-     *  Train a skill. Should be called every time a task is completed
-     *  @param skill - The skill to train
-     */
-    public function detrain(skill:SkillTypes, name:String = "unnamed"):Void {
-        var x = 1.01;
-        switch(skill) {
-            case MINE: {
-            }
-            case WALK: {}
-            case CARRY: {
-            }
-            case ATTACK: {
             }
         }
 

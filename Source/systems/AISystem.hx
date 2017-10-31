@@ -314,7 +314,9 @@ class AISystem extends System {
 
 		if(task.target.has(ToolMining)) {
 			if(entity.has(ToolMining)) {
-				if(task.target.get(ToolMining).strength > entity.get(ToolMining).strength) {
+				var target = task.target.get(ToolMining);
+				var current = entity.get(ToolMining);
+				if(target.strength > current.strength) {
 					this.factory.dropLoot(entity.get(TilePosition).point, entity.remove(ToolMining));
 				} else return;
 			}
@@ -344,8 +346,7 @@ class AISystem extends System {
 				entity.remove(Ore);
 				var worker:Worker = entity.get(Worker);
 				worker.train(SkillTypes.CARRY, entity.name);
-				// Estimate a little less time next time
-				worker.tweakEstimations(task.timeTaken - task.estimatedTime);
+
 				GameDataService.instance.requestOre();
 			} else {
 				trace("Worker did not have Ore");

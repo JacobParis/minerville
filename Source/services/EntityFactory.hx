@@ -304,10 +304,6 @@ class EntityFactory {
         var task = entity.get(Task);
 		entity.remove(Task);	
 		
-        if(entity.has(Worker)) {
-			entity.get(Worker).tweakEstimations(task.timeTaken - task.estimatedTime);
-		}
-		//node.worker.detrain(node.task.action);
 		if(entity.has(Ore) && entity.has(TilePosition)) {
 			var position = entity.get(TilePosition);
 			dropLoot(position.point, entity.remove(Ore));
