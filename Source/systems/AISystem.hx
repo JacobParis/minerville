@@ -174,7 +174,7 @@ class AISystem extends System {
 			// Drop task if it takes longer than expected
 			node.task.timeTaken += 1;
 
-			if(!isSelected && node.task.timeTaken > node.task.estimatedTime * 1.5) {
+			if(!isSelected && node.task.timeTaken > node.task.estimatedTime + 20) {
 				factory.dropTask(node.entity);
 				continue;
 			}
@@ -220,7 +220,7 @@ class AISystem extends System {
 						// We didn't move, try again'
 						var path = generatePath(position.point, destination, area, isSelected);
 						if(path == null) {
-							if(isSelected) trace(node.entity.name + " failed to reach the task target.");
+							trace(node.entity.name + " failed to reach the task target.");
 							factory.dropTask(node.entity);
 							continue;
 						} else {
