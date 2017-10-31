@@ -108,7 +108,6 @@ class TileMapService {
                 case " ": continue;
                 case "-": continue;
                 case "¬": {
-                    trace(rowLength, i);
                     if(rowLength == 0) rowLength = i;
                     continue;
                 }
@@ -139,7 +138,6 @@ class TileMapService {
             switch(tileType) {
                 case ORE: this.factory.createOre(position, id);
                 case WALL: {
-                    trace("WALL", position);
                     var id = 0;
                     var hardness = 1;
                     var health = 1;
@@ -265,6 +263,7 @@ class TileMapService {
         backdrops.removeTile(tile);
     }
 
+    // TODO move to entityfactory
     public function lookAround(position:Point, distance:Int):RelativeArray2D<Null<Bool>> {
 		var size = distance * 2 + 1;
 		var surroundings:RelativeArray2D<Null<Bool>> = new RelativeArray2D<Null<Bool>>(size, size, new Point(distance,distance), false);
@@ -277,6 +276,18 @@ class TileMapService {
 		return surroundings;
 	}
 
+    public function hasNeighbour(position:Point, type:TileTypes) {
+        var neighbours = [new Point(1,0), new Point(0, -1), new Point(-1, 0), new Point(0, 1)];
+
+        for(point in neighbours) {
+            point.addPoint(position);
+            if(!positionMap.exists(point)) continue;
+            if(positionMap.get(point) == null) continue;
+            if(positionMap.get(point).id == enumMap.get(type)) return true;
+        }
+
+        return false;
+    }
     
 }
 

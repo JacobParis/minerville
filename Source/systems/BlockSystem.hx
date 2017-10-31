@@ -75,6 +75,9 @@ class BlockSystem extends System {
 		for (node in engine.getNodeList(BlockNode)) {
 			// Randomly ask to be mined
 			if(TechService.instance.isTechUnlocked("search-dirt")) {
+				// Skip this block if no exposed edges are visible
+				if(!TileMapService.instance.hasNeighbour(node.position.point, FLOOR)) continue;
+				
 				if(node.entity.has(Hardness)) {
 					// Harder rocks are exponentially less likely to be selected
 					var chance = 0.5 / node.entity.get(Hardness).value / node.entity.get(Hardness).value;
