@@ -49,7 +49,6 @@ class TaskSystem extends System {
 
 		// Run through the list of tasks
 		for(task in queue) {
-			
 			// Clean up bad tasks
 			if(task.target == null || engine.getEntityByName(task.target.name) == null) {
 				TaskService.instance.removeTask(task);
@@ -83,15 +82,15 @@ class TaskSystem extends System {
 				if(task.action == SkillTypes.CARRY) {
 					if(node.entity.has(ToolMining) && task.target.has(ToolMining)) {
 						if(node.entity.get(ToolMining).strength > task.target.get(ToolMining).strength)
-							threshold = 1;					
-					}
+							continue;
+						}
 				}
 
 				var base = (1.0 / task.difficulty) - threshold;
 				suitability = base + (currentTime - task.timePosted) / 10000.0;
 				if(Util.chance(suitability) || task.priority > 1) { // Currently returning values around 0.9
 					//trace("		and made a bid!");
-						node.entity.remove(TaskBid);
+					if(node.entity.has(TaskBid)) node.entity.remove(TaskBid);
 					
 					node.entity.add(new TaskBid(task, suitability));
 				} else {

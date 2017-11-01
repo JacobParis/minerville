@@ -28,7 +28,8 @@ class Task {
     }
 
     public inline function location():Point {
-        return target.get(TilePosition).point;
+        var position:TilePosition = target.get(TilePosition);
+        return position.point;
     }
 
     public function toString() {

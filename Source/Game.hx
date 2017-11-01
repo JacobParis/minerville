@@ -23,7 +23,7 @@ import services.TimeService;
 import services.TileMapService;
 import services.UIService;
 
-import systems.AISystem;
+import systems.WorkerTaskSystem;
 import systems.BlockSystem;
 import systems.ControlSystem;
 import systems.EventSystem;
@@ -31,7 +31,10 @@ import systems.LootSystem;
 import systems.RenderSystem;
 import systems.TaskSystem;
 import systems.TileRenderSystem;
+import systems.TravelSystem;
 import systems.WorkerSystem;
+import systems.WorkerMiningSystem;
+
 
 
 class Game {
@@ -77,14 +80,20 @@ class Game {
         var lootSystem = new LootSystem();
         addSystem(lootSystem);
 
-        var workerSystem = new WorkerSystem();
-        addSystem(workerSystem);
-
         var taskSystem = new TaskSystem();
         addSystem(taskSystem);
 
-        var aiSystem = new AISystem();
-        addSystem(aiSystem);
+        var travelSystem = new TravelSystem();
+        addSystem(travelSystem);
+
+        var workerSystem = new WorkerSystem();
+        addSystem(workerSystem);
+
+        var workerTaskSystem = new WorkerTaskSystem();
+        addSystem(workerTaskSystem);
+
+        var workerMiningSystem = new WorkerMiningSystem();
+        addSystem(workerMiningSystem);
 
         var blockSystem = new BlockSystem();
         addSystem(blockSystem);
@@ -111,10 +120,12 @@ class Game {
         tockProvider = new FixedTickProvider(gameLayer, 0.2);
         tockProvider.add(controlSystem.tock);
         tockProvider.add(lootSystem.tock);
-        tockProvider.add(workerSystem.tock);
         tockProvider.add(blockSystem.tock);
         tockProvider.add(taskSystem.tock);
-        tockProvider.add(aiSystem.tock);
+        tockProvider.add(travelSystem.tock);
+        tockProvider.add(workerSystem.tock);
+        tockProvider.add(workerTaskSystem.tock);
+        tockProvider.add(workerMiningSystem.tock);
         tockProvider.add(ui.update);
         tockProvider.start();
 

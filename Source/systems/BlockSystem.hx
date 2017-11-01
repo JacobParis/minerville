@@ -77,7 +77,7 @@ class BlockSystem extends System {
 			if(TechService.instance.isTechUnlocked("search-dirt")) {
 				// Skip this block if no exposed edges are visible
 				if(!TileMapService.instance.hasNeighbour(node.position.point, FLOOR)) continue;
-				
+
 				if(node.entity.has(Hardness)) {
 					// Harder rocks are exponentially less likely to be selected
 					var chance = 0.5 / node.entity.get(Hardness).value / node.entity.get(Hardness).value;
@@ -104,50 +104,6 @@ class BlockSystem extends System {
 					node.tile.id = TileMapService.instance.enumMap.get(TileTypes.WALL) + hardness;
 				}
 			}
-		}
-
-		for (node in engine.getNodeList(LootNode)) {
-			// Randomly ask to be collected
-			if(TechService.instance.isTechUnlocked("search-ore")) {
-				if(node.entity.has(Stimulus)) {
-					TaskService.instance.addTask(new Task(SkillTypes.CARRY, node.entity), node.entity.get(Stimulus).strength);
-				} else if(Util.chance(0.8)) {
-					TaskService.instance.addTask(new Task(SkillTypes.CARRY, node.entity), 2);
-				}
-			}
-		}
-
-		// Cave-in
-		if(Util.chance(0.01) && Util.chance(0.1)) {
-			CameraService.instance.triggerShake();
-
-			var block = EntityFactory.instance.findBlock();
-			var cavein = "
-			-X-
-			XXX
-			-X-";
-
-			var position:TilePosition = block.get(TilePosition);
-
-			var event = new GameEvent(EventTypes.DISASTER, "Cave-In at " + position.point);
-			NotificationService.instance.addNotification(event);
-
-			Timer.delay(function () {
-				 var newPoints = TileMapService.instance.loadTilePattern(cavein, position.point.clone().add(-1,-1), true);
-
-
-				for(cell in newPoints) {
-					var crushedWorker = EntityFactory.instance.workerAt(cell.x, cell.y);
-					if(crushedWorker == null) continue;
-
-					trace("Crushed Worker");
-					crushedWorker.add(new DeadMarker("cave-in"));
-
-
-		
-				}
-			}, 400);
-
 		}
 	}
 

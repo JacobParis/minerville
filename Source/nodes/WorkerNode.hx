@@ -12,6 +12,11 @@ class WorkerNode extends Node<WorkerNode> {
     public var worker:Worker;
 }
 
+class FreeWorkerNode extends Node<FreeWorkerNode> {
+    public var position:TilePosition;
+    public var worker:Worker;
+}
+
 class DeadWorkerNode extends Node<DeadWorkerNode> {
     public var position:TilePosition;
     public var worker:Worker;
